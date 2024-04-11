@@ -1,11 +1,11 @@
 import * as THREE from "three";
-import { ModelLoader } from "./model-loader.ts";
-import { Fragment, FragmentMesh } from "bim-fragment";
-import { MeshBVH } from "three-mesh-bvh";
-import { RoundedBoxGeometry } from "three/examples/jsm/geometries/RoundedBoxGeometry.js";
-import { VoxelModelData } from "./model-element.ts";
-import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils";
-import { MeshBasicMaterial } from "three";
+import {ModelLoader} from "./model-loader.ts";
+import {Fragment, FragmentMesh} from "bim-fragment";
+import {MeshBVH} from "three-mesh-bvh";
+import {RoundedBoxGeometry} from "three/examples/jsm/geometries/RoundedBoxGeometry.js";
+import {VoxelModelData} from "./model-element.ts";
+import {mergeGeometries} from "three/examples/jsm/utils/BufferGeometryUtils";
+import {MeshBasicMaterial} from "three";
 
 const rays = [
     new THREE.Vector3(0, 1, 0),   // Tia phía trên
@@ -13,16 +13,7 @@ const rays = [
     new THREE.Vector3(-1, 0, 0),  // Tia phía trái
     new THREE.Vector3(1, 0, 0),   // Tia phía phải
     new THREE.Vector3(0, 0, -1),  // Tia phía trước
-    new THREE.Vector3(0, 0, 1),    // Tia phía sau
-    //test
-    new THREE.Vector3(1, 1, 0),   // Up-Right
-    new THREE.Vector3(-1, 1, 0),  // Up-Left
-    new THREE.Vector3(1, -1, 0),  // Down-Right
-    new THREE.Vector3(-1, -1, 0), // Down-Left
-    new THREE.Vector3(1, 0, 1),   // Right-Back
-    new THREE.Vector3(-1, 0, 1),  // Left-Back
-    new THREE.Vector3(0, 1, 1),   // Up-Back
-    new THREE.Vector3(0, -1, 1),  // Down-Back
+    new THREE.Vector3(0, 0, 1)    // Tia phía sau
 ];
 
 export class ModelHandler {
@@ -35,54 +26,77 @@ export class ModelHandler {
     public cleanUp() {
 
     }
+
+
     public async voxelizeModel() {
         const modelElement = this._modelLoader.getElement();
         const concreteList = modelElement.concreteList;
         const boundingBoxOfConcrete = modelElement.boundingBox;
         if (concreteList.length < 1 || !boundingBoxOfConcrete) return;
-        console.log('concreteList', concreteList)
-        // Test bounding box
-        const boxHelper = new THREE.Box3Helper(boundingBoxOfConcrete, 0xffff00);
-        this._modelLoader.getScene()?.get().add(boxHelper);
-
-        // Traverse mesh
-        for (const concrete of concreteList) {
-            concrete.traverse((child: any) => {
-                if (child instanceof THREE.Mesh) {
-                    child.material.side = THREE.DoubleSide;
-                }
-            });
-        }
 
         const timestampStart = new Date().getTime();
+
         const gridSize = this._modelLoader.settings.gridSize;
         const boxSize = this._modelLoader.settings.boxSize;
         const boxRoundness = this._modelLoader.settings.boxRoundness;
-        console.log('------ concreteList', concreteList);
 
+        console.log('------ concreteList', concreteList)
         modelElement.voxelModelData = [];
-
-        for (let x = boundingBoxOfConcrete.min.x; x <= boundingBoxOfConcrete.max.x + gridSize; x += gridSize) {
-            for (let y = boundingBoxOfConcrete.min.y; y <= boundingBoxOfConcrete.max.y + gridSize; y += gridSize) {
-                for (let z = boundingBoxOfConcrete.min.z; z <= boundingBoxOfConcrete.max.z + gridSize; z += gridSize) {
+        for (let x = boundingBoxOfConcrete.min.x ; x <= boundingBoxOfConcrete.max.x ; x += gridSize) {
+            for (let y = boundingBoxOfConcrete.min.y; y <= boundingBoxOfConcrete.max.y; y += gridSize) {
+                for (let z = boundingBoxOfConcrete.min.z; z <= boundingBoxOfConcrete.max.z; z += gridSize) {
                     const centerPoint = new THREE.Vector3(x + boxSize / 2, y + boxSize / 2, z + boxSize / 2);
+                    const box = new THREE.Box3();
+                    box.min.setScalar(-1*gridSize ).add( centerPoint );
+                    box.max.setScalar(gridSize).add( centerPoint );
 
                     for (const mesh of concreteList) {
                         if (this.checkCollision(centerPoint, mesh)) {
-                            modelElement.voxelModelData.push(new VoxelModelData(centerPoint, boxSize, boxRoundness));
-                            break;
+                            modelElement.voxelModelData.push(new VoxelModelData(centerPoint, boxSize, boxRoundness))
+                            break
                         }
                     }
                 }
             }
         }
-
         const timestampEnd = new Date().getTime();
-        console.log(`Success took ${timestampEnd - timestampStart} ms`, modelElement.voxelModelData);
+        console.log(`Success took ${timestampEnd - timestampStart} ms`, modelElement.voxelModelData)
+    }
 
+    public reSetupVoxel() {
+        this._modelLoader.getElement().voxelModelData.forEach((voxel: VoxelModelData) => {
+            this._modelLoader.getScene()?.get().remove(voxel.mesh)
+        })
+        this.voxelizeModel()
+        this._modelLoader.getElement().voxelModelData.forEach((voxel: VoxelModelData) => {
+            this._modelLoader.getScene()?.get().add(voxel.mesh)
+        })
     }
 
     public renderVoxelModel(isShow: boolean = true) {
+        const geometries = this._modelLoader?.getElement().concreteList.map((item: FragmentMesh) => {
+            console.log('----- item.geometry', item.geometry)
+
+            this._modelLoader.getScene()?.get().add(item)
+            return item.geometry;
+        })
+
+        const boundingBox = this._modelLoader?.getElement().boundingBox?.clone();
+        if (boundingBox) {
+            const geometryMerge = mergeGeometries(geometries)
+
+            // geometryMerge.attributes['position'] = geometryMerge.attributes['normal']
+            // geometryMerge.boundingBox = boundingBox;
+            // const boundingSphere = new THREE.Sphere();
+            // boundingBox.getBoundingSphere(boundingSphere);
+            // geometryMerge.boundingSphere = boundingSphere;
+
+            const mesh=new THREE.Mesh(geometryMerge,new THREE.MeshStandardMaterial({color:'#09c',side:THREE.DoubleSide}));
+            console.log('---------- newMesh', mesh)
+            // this._modelLoader.getScene()?.get().add(mesh)
+        }
+
+
         this._modelLoader.getElement().voxelModelData.forEach((voxel: VoxelModelData) => {
             if (isShow) {
                 this._modelLoader.getScene()?.get().add(voxel.mesh)
@@ -94,12 +108,12 @@ export class ModelHandler {
 
     public mergeTypedArrays(type, arrays) {
         var totalLength = 0;
-        arrays.forEach(function (array) {
+        arrays.forEach(function(array) {
             totalLength += array.length;
         });
         var mergedArray = new type(totalLength);
         var offset = 0;
-        arrays.forEach(function (array) {
+        arrays.forEach(function(array) {
             mergedArray.set(array, offset);
             offset += array.length;
         });
@@ -112,7 +126,7 @@ export class ModelHandler {
         for (const rayDirection of rays) {
             raycaster.set(point, rayDirection);
             const intersects = raycaster.intersectObject(mesh);
-            if (intersects.length > 0 && (intersects[0].distance <= this._modelLoader.settings.gridSize / 2)) {
+            if (intersects.length > 0 && intersects[0].distance <= this._modelLoader.settings.gridSize) {
                 return true;
             }
         }
@@ -138,37 +152,37 @@ export class ModelHandler {
         console.log(`Success took ${timestampEnd - timestampStart} ms`)
     }
 
-    private * handleVoxelModel(mesh: FragmentMesh) {
+    private* handleVoxelModel(mesh: FragmentMesh) {
         const bvh = new MeshBVH(mesh.geometry);
         const boundingBox = this._modelLoader.getBoundingBox();
-        const invMat = new THREE.Matrix4().copy(mesh.matrix).invert();
+        const invMat = new THREE.Matrix4().copy( mesh.matrix ).invert();
 
         const bbox = new THREE.BoxHelper(mesh, 0xffff00); // Màu vàng cho bounding box
         this._modelLoader.getScene()?.get().add(bbox);
 
         const rayX = new THREE.Ray();
-        rayX.direction.set(1, 0, 0);
+        rayX.direction.set( 1, 0, 0 );
 
         const rayY = new THREE.Ray();
-        rayY.direction.set(0, 1, 0);
+        rayY.direction.set( 0, 1, 0 );
 
         const rayZ = new THREE.Ray();
-        rayZ.direction.set(0, 0, 1);
+        rayZ.direction.set( 0, 0, 1 );
 
 
         // Get size data
         const gridSize = this._modelLoader.settings.gridSize;
         const boxSize = this._modelLoader.settings.boxSize;
-        for (let x = boundingBox.min.x; x <= boundingBox.max.x; x += gridSize) {
-            for (let y = boundingBox.min.y; y <= boundingBox.max.y; y += gridSize) {
-                for (let z = boundingBox.min.z; z <= boundingBox.max.z; z += gridSize) {
+        for (let x = boundingBox.min.x ; x <= boundingBox.max.x ; x += gridSize) {
+            for (let y = boundingBox.min.y ; y <= boundingBox.max.y; y += gridSize) {
+                for (let z = boundingBox.min.z ; z <= boundingBox.max.z; z += gridSize) {
                     // get position form center of voxel block
                     const centerPoint = new THREE.Vector3(x + boxSize / 2, y + boxSize / 2, z + boxSize / 2);
 
                     if (this.test(centerPoint, mesh)) {
                         console.log('----------------------- 123123')
-                        const result: VoxelModelData = { position: centerPoint };
-                        yield result;
+                            const result: VoxelModelData = {position: centerPoint};
+                            yield result;
                     }
 
                     // const box = new THREE.Box3();
@@ -274,7 +288,7 @@ export class ModelHandler {
 
     private testRenderCenterVoxel(point: THREE.Vector3) {
         const dotGeometry = new THREE.BufferGeometry();
-        dotGeometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array([point.x, point.y, point.z]), 3));
+        dotGeometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array([point.x,point.y,point.z]), 3));
         const dotMaterial = new THREE.PointsMaterial({ size: 0.05, color: 0xff0000 });
         const dot = new THREE.Points(dotGeometry, dotMaterial);
         this._modelLoader.getScene()?.get().add(dot);
