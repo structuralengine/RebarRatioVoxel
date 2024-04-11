@@ -1,19 +1,20 @@
-import {useCallback, useContext} from 'react';
+import {useCallback, useContext, useEffect} from 'react';
 import {ViewerContext} from "../../../contexts";
 import {toast} from "react-toastify";
 
 const VoxelizeButton = () => {
-    const {modelLoader} = useContext(ViewerContext)
+    const { modelLoader, setVoxelized, voxelized } = useContext(ViewerContext)
+
+    useEffect(() => {
+        if (voxelized && modelLoader) {
+            modelLoader.showVoxelModel()
+        }
+
+    }, [voxelized, modelLoader])
 
     const handleVoxelize = useCallback(async () => {
         if (modelLoader) {
-            await modelLoader.voxelizeModel()
-            toast('Successfully', {
-                toastId: '1',
-                type: 'success',
-                position: 'top-center',
-                autoClose: 3000
-            })
+            setVoxelized(true)
         } else {
             toast('Model has not been uploaded yet', {
                 type: 'error',
@@ -23,8 +24,18 @@ const VoxelizeButton = () => {
         }
     }, [modelLoader])
 
+    const hideVoxelModel = useCallback(async () => {
+        setVoxelized(false)
+        modelLoader?.hideVoxelModel();
+    }, [modelLoader])
+
     return (
-        <button className='tool-sidebar-btn' onClick={handleVoxelize}>Voxelize model</button>
+        <>
+            {
+                voxelized ? <button className='btn btn-warning' onClick={hideVoxelModel}>Hide voxel</button>
+                    : <button className='btn btn-success' onClick={handleVoxelize}>Show voxel</button>
+            }
+        </>
     );
 };
 

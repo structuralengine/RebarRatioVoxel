@@ -26,11 +26,11 @@ export class CommonLoader {
         this._cullerUpdate.init(this._components);
 
         this._settings = new IfcFragmentSettings();
-        // this._settings.autoSetWasm = true;
-        this._settings.wasm = {
-            path: "https://unpkg.com/web-ifc@0.0.51/",
-            absolute: true
-        };
+        this._settings.autoSetWasm = true;
+        // this._settings.wasm = {
+        //     path: "https://unpkg.com/web-ifc@0.0.51/",
+        //     absolute: true
+        // };
     }
 
     public getModel() {
