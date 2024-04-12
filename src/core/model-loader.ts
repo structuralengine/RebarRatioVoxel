@@ -177,6 +177,7 @@ export class ModelLoader extends CommonLoader {
 
     public showVoxelModel() {
         this._handle.renderVoxelModel()
+        this.testSelectVoxel();
     }
 
     public hideVoxelModel() {
@@ -331,5 +332,49 @@ export class ModelLoader extends CommonLoader {
                 }
             }
         }
+    }
+    private testSelectVoxel() {
+        const mouse = new THREE.Vector2();
+        const camera = this._camera?.get();
+        const scene = this._scene?.get();
+        let hoverMesh: THREE.Mesh | null = null;
+        let isRed: boolean = false;
+    
+        if (!camera || !scene) return;
+    
+        window.addEventListener('mousedown', (event) => {
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
+    
+            const vector = new THREE.Vector3(mouse.x, mouse.y, 1);
+            const data = vector.unproject(camera);
+            const ray = new THREE.Raycaster(camera.position, data.sub(camera.position).normalize());
+            const intersects = ray.intersectObjects(scene.children);
+    
+            let newHoverMesh: THREE.Mesh | null = null;
+            for (let i = 0; i < intersects.length; i++) {
+                if (intersects[i].object instanceof THREE.Mesh) {
+                    newHoverMesh = intersects[i].object as THREE.Mesh;
+                    break;
+                }
+            }
+    
+            if (newHoverMesh !== hoverMesh) {
+                if (hoverMesh && hoverMesh.material && hoverMesh.material.color) {
+                    hoverMesh.material.color.set(isRed ? 0xff0000 : 0xffffff); // Chuyển đổi màu đỏ/mặc định
+                }
+                hoverMesh = newHoverMesh;
+                if (hoverMesh && hoverMesh.material && hoverMesh.material.color) {
+                    hoverMesh.material.color.set(isRed ? 0xffffff : 0xff0000); // Chuyển đổi màu mặc định/màu đỏ
+                }
+            }
+        });
+    
+        window.addEventListener('click', () => {
+            if (hoverMesh && hoverMesh.material && hoverMesh.material.color) {
+                isRed = !isRed; 
+                hoverMesh.material.color.set(isRed ? 0xff0000 : 0xffffff); // Chuyển đổi màu đỏ/mặc định
+            }
+        });
     }
 }
