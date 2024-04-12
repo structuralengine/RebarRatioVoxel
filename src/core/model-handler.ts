@@ -1,7 +1,7 @@
 import * as THREE from "three";
-import { ModelLoader } from "./model-loader.ts";
-import { FragmentMesh } from "bim-fragment";
-import { VoxelModelData } from "./model-element.ts";
+import {ModelLoader} from "./model-loader.ts";
+import {FragmentMesh} from "bim-fragment";
+import {VoxelModelData} from "./model-element.ts";
 
 const rays = [
     // ray directions to the center of voxel
@@ -41,6 +41,7 @@ export class ModelHandler {
     public cleanUp() {
 
     }
+
     public async voxelizeModel() {
         const modelElement = this._modelLoader.getElement();
         const concreteList = modelElement.concreteList;
@@ -74,8 +75,9 @@ export class ModelHandler {
                 for (let z = boundingBoxOfConcrete.min.z; z <= boundingBoxOfConcrete.max.z + gridSize; z += gridSize) {
                     const centerPoint = new THREE.Vector3(x + gridSize / 2, y + gridSize / 2, z + gridSize / 2);
 
+                    const maxDistance = Math.sqrt(3) * gridSize / 2;
                     for (const mesh of concreteList) {
-                        if (this.checkCollision(centerPoint, mesh, gridSize)) {
+                        if (this.checkCollision(centerPoint, mesh, maxDistance)) {
                             modelElement.voxelModelData.push(new VoxelModelData(centerPoint, boxSize, boxRoundness));
                             break;
                         }
@@ -89,33 +91,22 @@ export class ModelHandler {
 
     }
 
-    private checkCollision(point: THREE.Vector3, mesh: FragmentMesh, distance: number) {
+    private checkCollision(point: THREE.Vector3, mesh: FragmentMesh, maxDistance: number) {
         const raycaster = this._modelLoader.getRaycaster()?.get();
         if (!raycaster) return false;
-        // console.log(rays[0])
-        // for (const rayDirection of rays) {
-        //     raycaster.set(point, rayDirection);
-        //     const intersects = raycaster.intersectObject(mesh);
-        //     if (intersects.length > 0 && (intersects[0].distance <= Math.sqrt(3)* this._modelLoader.settings.gridSize /2  )) {
-        //         return true;
-        //     }
-        // }
-        for (let i = 0; i < rays.length; i++) {
-            const rayDirection = rays[i];
+
+        for (const rayDirection of rays) {
             raycaster.set(point, rayDirection);
-            // Adjust max distance based on ray direction
-            let maxDistance = distance / 2;
-            if (i >= 6 && i <= 13) { // Rays towards the corners
-                maxDistance = Math.sqrt(2) * distance / 2; // Adjusted max distance for corner rays
-            }
-            if (i > 13) { // Rays towards the corners
-                maxDistance = Math.sqrt(3) * distance / 2; // Adjusted max distance for corner rays
-            }
             const intersects = raycaster.intersectObject(mesh);
-            if (intersects.length > 0 && intersects[0].distance <= maxDistance) {
-                return true;
+            if (intersects.length > 0) {
+                for (let intersect of intersects) {
+                    if (intersect.distance <= maxDistance) {
+                        return true;
+                    }
+                }
             }
         }
+
         return false;
     }
 
