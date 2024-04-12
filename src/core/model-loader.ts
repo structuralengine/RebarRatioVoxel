@@ -91,8 +91,10 @@ export class ModelLoader extends CommonLoader {
             const isOk = await super.setup()
             if (isOk) {
                 await this.loadModel();
-                const voxelMeshes = this._elements.getVoxelMeshes();
-                this.testSelectVoxel(voxelMeshes);
+                const meshesWithType = this._elements.getAllMeshesWithType();
+                console.log("------------check rebar",meshesWithType)
+                // const allMeshes = meshesWithType.flatMap(item => item.meshes);
+                this.clickSelectVoxel(meshesWithType);
                 return true;
             }
             return false;
@@ -335,7 +337,8 @@ export class ModelLoader extends CommonLoader {
             }
         }
     }
-    private testSelectVoxel(voxelMeshes: THREE.Object3D[]) {
+    private clickSelectVoxel(meshesWithType: {type:string;meshes: THREE.Object3D[]}[]) {
+        // console.log("clickSelectVoxel",voxelMeshes)
         const mouse = new THREE.Vector2();
         const camera = this._camera?.get();
         const scene = this._scene?.get();
@@ -351,7 +354,7 @@ export class ModelLoader extends CommonLoader {
             const vector = new THREE.Vector3(mouse.x, mouse.y, 1);
             const data = vector.unproject(camera);
             const ray = new THREE.Raycaster(camera.position, data.sub(camera.position).normalize());
-            const intersects = ray.intersectObjects(voxelMeshes);
+            const intersects = ray.intersectObjects(this.flattenMeshes(meshesWithType));
     
             let newHoverMesh: THREE.Mesh | null = null;
             for (let i = 0; i < intersects.length; i++) {
@@ -372,11 +375,38 @@ export class ModelLoader extends CommonLoader {
             }
         });
     
-        window.addEventListener('click', () => {
+        window.addEventListener('mousedown', () => {
             if (hoverMesh && hoverMesh.material && hoverMesh.material.color) {
                 isRed = !isRed; 
                 hoverMesh.material.color.set(isRed ? 0xff0000 : 0xffffff); // Chuyển đổi màu đỏ/mặc định
             }
         });
+        window.addEventListener('mousedown', () => {
+            if (hoverMesh) {
+                const meshType = this.getMeshType(meshesWithType);
+                console.log('meshType', meshType);
+                if (meshType === 'reinforcingBar') {
+                   console.log('reinforcingBar');
+                } else if (meshType === 'voxel') {
+                    console.log('voxel');
+                }else{
+                    console.log('other');
+                }
+            }
+        });
+    }
+    private flattenMeshes(meshesWithType: { type: string; meshes: THREE.Object3D[] }[]): THREE.Object3D[] {
+        return meshesWithType.flatMap(item => item.meshes);
+    }
+    
+    // Phương thức để lấy loại của mesh dựa trên meshesWithType
+    private getMeshType(meshesWithType: { type: string; meshes: THREE.Object3D[] }[]): string | null {
+        console.log('getMeshType', meshesWithType);
+        for (const item of meshesWithType) {
+            // if (item.includes()) {
+                return item.type;
+            // }
+        }
+        return null;
     }
 }
