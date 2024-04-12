@@ -14,11 +14,7 @@ const ToolSideBar = ({ isShow }: ToolSideBarProps) => {
     const [showVoxelElement, setShowVoxelElement] = useState(false);
 
     const handleVoxelButtonClick = () => {
-        if (!showVoxelElement) {
-            setShowVoxelElement(true);
-        } else {
-            setShowVoxelElement(false);
-        }
+        setShowVoxelElement(prevState => !prevState);
     };
 
     if (!isShow) return null
