@@ -91,3 +91,48 @@
     flex-direction: column;
     justify-content: center;
 }
+
+.ui-control {
+    position: absolute;
+    right: 2%;
+    top: 3%;
+    color: #ebebeb;
+    background-color: #1f1f1f;
+    z-index: 1000;
+    width: 300px;
+    border-radius: 10px;
+}
+
+.ui-control .header {
+    background: #111111;
+    padding: 2px 8px;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 10px;
+}
+
+.ui-control .body {
+    padding: 10px;
+}
+
+.ui-control .element {
+    font-size: 13px;
+}
+
+.ui-control .input {
+    display: flex;
+}
+
+.ui-control .input-range {
+    width: 15%;
+    height: 23px;
+    margin-left: 10px;
+    border-radius: 5px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.ui-control .checkbox {
+    margin-right: 8px;
+    cursor: pointer;
+}
