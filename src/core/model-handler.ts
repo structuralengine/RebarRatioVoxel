@@ -78,7 +78,26 @@ export class ModelHandler {
 
                     for (const mesh of concreteList) {
                         if (this.checkCollision(centerPoint, mesh, maxDistance)) {
-                            modelElement.voxelModelData.push(new VoxelModelData(centerPoint, boxSize, boxRoundness));
+                            const newVoxel = new VoxelModelData(centerPoint, boxSize, boxRoundness);
+                            modelElement.voxelModelData.push(newVoxel);
+                            const reinforcingBarInVoxel = this.geAllCollidingObjects(newVoxel.mesh);
+                            const l = reinforcingBarInVoxel.length;
+                            const hoverMesh = newVoxel.mesh.children[1] as THREE.Mesh
+                            let c = 0x00d4ff;
+                            if (l > 0 && l < 2) {
+                              c = 0x09e8cd;
+                            } else if (l >= 2 && l < 5) {
+                              c = 0x09e810;
+                            } else if (l >= 5 && l < 8) {
+                              c = 0xe8de09;
+                            } else if (l >= 8 && l < 10) {
+                              c = 0xe80909;
+                            } else if ( l >= 10) {
+                              c = 0xe80909;
+                            }
+                            hoverMesh.material.color.set(c);
+                            console.log(newVoxel)
+                            console.log(reinforcingBarInVoxel.length)
                             break;
                         }
                     }
@@ -89,6 +108,21 @@ export class ModelHandler {
         const timestampEnd = new Date().getTime();
         console.log(`Success took ${timestampEnd - timestampStart} ms`, modelElement.voxelModelData);
 
+    }
+
+    private geAllCollidingObjects(mesh:THREE.Object3D) {
+        const fromMeshes = this._modelLoader.getElement().reinforcingBarList;//returns all Boxes of the scene
+        const boundary = new THREE.Box3().setFromObject(mesh);
+        const collidingObjs:THREE.Object3D[]=[];
+        fromMeshes.forEach((meshNow:THREE.Object3D)=>
+        {
+            const otherBounds = new THREE.Box3().setFromObject(meshNow);
+            if(boundary.intersectsBox(otherBounds))
+            {
+                collidingObjs.push(meshNow)
+            }
+        });
+        return collidingObjs;
     }
 
     private checkCollision(point: THREE.Vector3, mesh: FragmentMesh, maxDistance: number) {
