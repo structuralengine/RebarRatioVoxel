@@ -2,7 +2,12 @@ import {useCallback, useContext, useState} from 'react';
 import {ViewerContext} from "../../../contexts";
 import {toast} from "react-toastify";
 
-const VoxelizeButton = () => {
+interface VoxelizeButtonProps {
+    onVoxelButtonClick: () => void; // Define the prop type explicitly
+}
+
+
+const VoxelizeButton : React.FC<VoxelizeButtonProps> = ({ onVoxelButtonClick }) => {
     const [voxelized, setVoxelized] = useState(false)
     const {modelLoader} = useContext(ViewerContext)
 
@@ -10,6 +15,7 @@ const VoxelizeButton = () => {
         if (modelLoader) {
             modelLoader.showVoxelModel()
             setVoxelized(true)
+            onVoxelButtonClick();
         } else {
             toast('Model has not been uploaded yet', {
                 type: 'error',
@@ -22,6 +28,7 @@ const VoxelizeButton = () => {
     const hideVoxelModel = useCallback(async () => {
         setVoxelized(false)
         modelLoader?.hideVoxelModel();
+        onVoxelButtonClick();
     }, [modelLoader])
 
     return (
