@@ -106,10 +106,10 @@ export class ModelHandler {
             // Adjust max distance based on ray direction
             let maxDistance = distance / 2;
             if (i >= 6 && i <= 13) { // Rays towards the corners
-                maxDistance = Math.sqrt(2) * maxDistance / 2; // Adjusted max distance for corner rays
+                maxDistance = Math.sqrt(2) * distance / 2; // Adjusted max distance for corner rays
             }
             if (i > 13) { // Rays towards the corners
-                maxDistance = Math.sqrt(3) * maxDistance / 2; // Adjusted max distance for corner rays
+                maxDistance = Math.sqrt(3) * distance / 2; // Adjusted max distance for corner rays
             }
             const intersects = raycaster.intersectObject(mesh);
             if (intersects.length > 0 && intersects[0].distance <= maxDistance) {
