@@ -9,7 +9,7 @@ const CloseModelButton = () => {
     }, [closeViewer])
 
     return (
-        <button className='tool-sidebar-btn mt-3' style={{backgroundColor: 'red'}} onClick={handleCloseModel}>Close model</button>
+        <button className='btn btn-danger mt-3' style={{backgroundColor: 'red'}} onClick={handleCloseModel}>Close model</button>
     );
 };
 

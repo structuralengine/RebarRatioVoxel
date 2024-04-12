@@ -84,3 +84,10 @@
     border-radius: 15px;
     flex-direction: column;
 }
+
+.element-show-container {
+    display: flex;
+    align-items: start;
+    flex-direction: column;
+    justify-content: center;
+}
