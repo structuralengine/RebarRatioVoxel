@@ -10,14 +10,17 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "bim-fragment": "^1.4.2",
-    "openbim-components": "^1.4.19",
+    "bim-fragment": "1.4.0",
+    "openbim-components": "1.4.19",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-toastify": "^10.0.5",
-    "three": "^0.161.0",
+    "three": "0.160.1",
     "three-mesh-bvh": "^0.7.3",
-    "web-ifc": "0.0.51"
+    "web-ifc": "0.0.51",
+    "bootstrap": "^5.3.3",
+    "@popperjs/core": "^2.11.8",
+    "react-bootstrap": "^2.10.2"
   },
   "devDependencies": {
     "@types/react": "^18.2.66",

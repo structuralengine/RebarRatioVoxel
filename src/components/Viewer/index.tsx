@@ -5,12 +5,9 @@ import DragAndDrop from "../DragAndDrop";
 import ModelLoading from "./ModelLoading.tsx";
 import {ViewerContext} from "../../contexts";
 import ToolSideBar from "./ToolSideBar";
-import {toast} from "react-toastify";
-import UiControl from "./UiControl.tsx";
 const Viewer = () => {
     const viewerRef = useRef<HTMLDivElement | null>(null)
     const [loaded, setLoaded] = useState<boolean | undefined>(undefined)
-    const [voxelized, setVoxelized] = useState<boolean | undefined>(undefined)
     const [modelLoader, setModelLoader] = useState<ModelLoader | undefined>(undefined);
 
     useEffect(() => {
@@ -27,16 +24,8 @@ const Viewer = () => {
             if (isLoaded) {
                 setLoaded(true)
                 setModelLoader(loader)
-                setVoxelized(true)
-                toast('Successfully', {
-                    toastId: '1',
-                    type: 'success',
-                    position: 'top-center',
-                    autoClose: 3000
-                })
             } else {
                 setLoaded(undefined)
-                setVoxelized(undefined)
                 await loader.cleanUp()
                 alert('Error load model IFC. Please try again!')
             }
@@ -50,7 +39,6 @@ const Viewer = () => {
 
         setModelLoader(undefined)
         setLoaded(undefined)
-        setVoxelized(undefined)
         if (viewerRef.current) {
             viewerRef.current.innerHTML = '';
             viewerRef.current.classList.remove('obc-viewer');
@@ -59,7 +47,7 @@ const Viewer = () => {
     }, [modelLoader])
 
     return (
-        <ViewerContext.Provider value={{loaded, setLoaded, modelLoader, setModelLoader, closeViewer: cleanUpViewer, setVoxelized, voxelized}}>
+        <ViewerContext.Provider value={{loaded, setLoaded, modelLoader, setModelLoader, closeViewer: cleanUpViewer}}>
             <div className='viewer-container'>
                 <div className='loading-container'>
                     <ModelLoading isShow={loaded === false}/>
@@ -69,9 +57,6 @@ const Viewer = () => {
                 </div>
                 <div className='sidebar'>
                     <ToolSideBar isShow={loaded === true}/>
-                </div>
-                <div className='ui-control'>
-                    <UiControl/>
                 </div>
                 <div className='viewer' ref={viewerRef}></div>
             </div>

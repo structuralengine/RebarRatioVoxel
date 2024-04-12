@@ -1,19 +1,14 @@
-import {useCallback, useContext, useEffect} from 'react';
+import {useCallback, useContext, useState} from 'react';
 import {ViewerContext} from "../../../contexts";
 import {toast} from "react-toastify";
 
 const VoxelizeButton = () => {
-    const { modelLoader, setVoxelized, voxelized } = useContext(ViewerContext)
-
-    useEffect(() => {
-        if (voxelized && modelLoader) {
-            modelLoader.showVoxelModel()
-        }
-
-    }, [voxelized, modelLoader])
+    const [voxelized, setVoxelized] = useState(false)
+    const {modelLoader} = useContext(ViewerContext)
 
     const handleVoxelize = useCallback(async () => {
         if (modelLoader) {
+            modelLoader.showVoxelModel()
             setVoxelized(true)
         } else {
             toast('Model has not been uploaded yet', {

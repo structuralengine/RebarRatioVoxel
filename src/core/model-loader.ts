@@ -8,32 +8,23 @@ import {IFCBUILDINGELEMENTPROXY, IFCREINFORCINGBAR} from "web-ifc";
 import {ModelElement} from "./model-element.ts";
 
 export const defaultVolume = 300;
-export const defaultGridSize = 0.4;
+export const defaultGridSize = 0.5;
 
 export class ModelSetting {
     public gridSize: number;
     public boxSize: number;
     public boxRoundness: number;
-    public minSizeLimit: number;
 
     constructor() {
         this.gridSize = defaultGridSize;
         this.boxSize = defaultGridSize;
         this.boxRoundness = 0.01;
-        this.minSizeLimit = defaultGridSize;
     }
 
     setup(volume: number) {
         const newSize = this.calculateScale(volume);
         this.gridSize = newSize;
         this.boxSize = newSize;
-        this.minSizeLimit = newSize
-    }
-
-    setupSetting(setting: any) {
-        this.gridSize = setting.gridSize
-        this.boxSize = setting.boxSize
-        this.boxRoundness = setting.boxRoundness
     }
 
     private calculateScale(volume: number) {
@@ -86,14 +77,6 @@ export class ModelLoader extends CommonLoader {
         return this._elements;
     }
 
-    public getSetting() {
-        return this.settings;
-    }
-
-    public reSetupLoadModel() {
-        this._handle.reSetupVoxel()
-    }
-
     public async cleanUp() {
         await super.cleanUp()
         if (this._file) {
@@ -127,9 +110,9 @@ export class ModelLoader extends CommonLoader {
                 item.mesh.computeBoundingSphere()
                 item.mesh.computeBoundingBox()
             })
-            console.log('---------- this._groupModel', this._groupModel)
+            console.log('groupModel', this._groupModel)
             this._groupModel.items.map((item: Fragment) => {{
-                    this.getBoudingBoxFormMesh(item.mesh)
+                this.getBoudingBoxFormMesh(item.mesh)
             }})
 
             await this.settingFirstGroupModel();
@@ -211,7 +194,7 @@ export class ModelLoader extends CommonLoader {
                 this._elements.concreteList = this._groupModel.children.filter((f) => idKeys.find(id => id === f.uuid) !== undefined) as FragmentMesh[]
                 this._elements.reinforcingBarList = this._groupModel.children.filter((f) => idKeys.find(id => id === f.uuid) === undefined) as FragmentMesh[]
                 this._elements.setup();
-                this.settings.setup(this._elements.concreteVolumne);
+                this.settings.setup(this._elements.concreteVolume);
             }
         }
     }

@@ -3,6 +3,9 @@ import {ModelLoader} from "./model-loader.ts";
 import {FragmentMesh} from "bim-fragment";
 import {RoundedBoxGeometry} from "three/examples/jsm/geometries/RoundedBoxGeometry.js";
 
+export const voxelEdgeMaterial = new THREE.LineBasicMaterial({ color: '#3c3c3c', opacity: 0.4 });
+export const voxelMaterial = new THREE.MeshBasicMaterial({ color: '#057400', opacity: 0.4, transparent: true });
+
 export class VoxelModelData {
     public readonly id: string
     public center: THREE.Vector3
@@ -20,13 +23,13 @@ export class VoxelModelData {
 
     private createVoxelMesh(pointCenter: THREE.Vector3, boxSize: number, boxRoundness: number = 0): THREE.Object3D {
         const geometry = new RoundedBoxGeometry(boxSize, boxSize, boxSize, 1, boxRoundness)
-        const edgeMaterial = new THREE.LineBasicMaterial({ color: '#3c3c3c', opacity: 0.4 });
+
         const edges = new THREE.EdgesGeometry(geometry);
-        const line = new THREE.LineSegments(edges, edgeMaterial);
+        const line = new THREE.LineSegments(edges, voxelEdgeMaterial.clone());
         line.position.copy(pointCenter)
 
-        const material = new THREE.MeshBasicMaterial({ color: '#057400', opacity: 0.4, transparent: true });
-        const voxelBlock = new THREE.Mesh(geometry, material);
+
+        const voxelBlock = new THREE.Mesh(geometry, voxelMaterial.clone());
         voxelBlock.position.copy(pointCenter);
 
         const mergedObject = new THREE.Object3D();
@@ -41,21 +44,17 @@ export class VoxelModelData {
 export class ModelElement {
     private _modelLoader: ModelLoader;
     public concreteList: FragmentMesh[];
-    public concreteVolumne: number;
+    public concreteVolume: number;
     public reinforcingBarList: FragmentMesh[];
-    public boundingBox?: THREE.Box3;
+    public boundingBoxConcrete?: THREE.Box3;
     public voxelModelData: VoxelModelData[]
 
     constructor(modelLoader: ModelLoader) {
         this._modelLoader = modelLoader;
         this.concreteList = [];
-        this.concreteVolumne = 0;
+        this.concreteVolume = 0;
         this.reinforcingBarList = [];
         this.voxelModelData = [];
-    }
-
-    public getConcreteList() {
-        return this.concreteList;
     }
 
     public cleanUp() {
@@ -65,7 +64,7 @@ export class ModelElement {
     }
 
     public setup() {
-        this.boundingBox = new THREE.Box3();
+        this.boundingBoxConcrete = new THREE.Box3();
         for (const concrete of this.concreteList) {
             concrete.computeBoundingBox();
             concrete.computeBoundingSphere();
@@ -83,24 +82,11 @@ export class ModelElement {
             }
 
             const objectBoundingBox = new THREE.Box3().setFromObject(concrete);
-            this.boundingBox.union(objectBoundingBox);
+            this.boundingBoxConcrete.union(objectBoundingBox);
         }
 
         const size = new THREE.Vector3();
-        this.boundingBox.getSize(size)
-        this.concreteVolumne = size.x * size.y * size.z;
-        console.log('boundingBox', this.boundingBox, this.concreteVolumne);
-
-        // drawing bounding box
-        // const boundingBoxGeometry = new THREE.BoxGeometry(
-        //     this.boundingBox.max.x - this.boundingBox.min.x,
-        //     this.boundingBox.max.y - this.boundingBox.min.y,
-        //     this.boundingBox.max.z - this.boundingBox.min.z
-        // );
-        //
-        // const boundingBoxMesh = new THREE.Mesh(boundingBoxGeometry);
-        // const boxHelper = new THREE.BoxHelper(boundingBoxMesh);
-        // boxHelper.material.color.set(0x00ff00);
-        // this._modelLoader.getScene()?.get().add(boxHelper);
+        this.boundingBoxConcrete.getSize(size)
+        this.concreteVolume = size.x * size.y * size.z;
     }
 }

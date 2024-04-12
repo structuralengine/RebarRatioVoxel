@@ -2,10 +2,9 @@ import {useCallback, useContext} from "react";
 import {ViewerContext} from "../../../contexts";
 
 const CloseModelButton = () => {
-    const {closeViewer, setVoxelized} = useContext(ViewerContext)
+    const {closeViewer} = useContext(ViewerContext)
 
     const handleCloseModel = useCallback(async () => {
-        setVoxelized(false)
         closeViewer()
     }, [closeViewer])
 

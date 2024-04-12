@@ -27,10 +27,6 @@ export class CommonLoader {
 
         this._settings = new IfcFragmentSettings();
         this._settings.autoSetWasm = true;
-        // this._settings.wasm = {
-        //     path: "https://unpkg.com/web-ifc@0.0.51/",
-        //     absolute: true
-        // };
     }
 
     public getModel() {
@@ -39,6 +35,10 @@ export class CommonLoader {
 
     public getScene() {
         return this._scene;
+    }
+
+    public getRaycaster() {
+        return this._raycaster;
     }
 
     protected async cleanUp() {

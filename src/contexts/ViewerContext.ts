@@ -8,9 +8,7 @@ export const ViewerContext =
             setLoaded: () => {},
             modelLoader: undefined,
             setModelLoader: () => {},
-            closeViewer: () => {},
-            voxelized: undefined,
-            setVoxelized: () => {}
+            closeViewer: () => {}
         });
 
 export interface ViewerContextProps {
@@ -19,6 +17,4 @@ export interface ViewerContextProps {
     modelLoader?: ModelLoader,
     setModelLoader?: (loader?: ModelLoader) => void
     closeViewer: () => void
-    voxelized?: boolean
-    setVoxelized: (value?: boolean) => void
 }
