@@ -66,6 +66,7 @@ export class ModelHandler {
         const gridSize = this._modelLoader.settings.gridSize;
         const boxSize = this._modelLoader.settings.boxSize;
         const boxRoundness = this._modelLoader.settings.boxRoundness;
+        const maxDistance = Math.sqrt(3) * gridSize / 2;
         console.log('------ concreteList', concreteList);
         console.log('rays', rays)
         modelElement.voxelModelData = [];
@@ -75,7 +76,6 @@ export class ModelHandler {
                 for (let z = boundingBoxOfConcrete.min.z; z <= boundingBoxOfConcrete.max.z + gridSize; z += gridSize) {
                     const centerPoint = new THREE.Vector3(x + gridSize / 2, y + gridSize / 2, z + gridSize / 2);
 
-                    const maxDistance = Math.sqrt(3) * gridSize / 2;
                     for (const mesh of concreteList) {
                         if (this.checkCollision(centerPoint, mesh, maxDistance)) {
                             modelElement.voxelModelData.push(new VoxelModelData(centerPoint, boxSize, boxRoundness));
