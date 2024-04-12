@@ -91,6 +91,8 @@ export class ModelLoader extends CommonLoader {
             const isOk = await super.setup()
             if (isOk) {
                 await this.loadModel();
+                const voxelMeshes = this._elements.getVoxelMeshes();
+                this.testSelectVoxel(voxelMeshes);
                 return true;
             }
             return false;
@@ -177,7 +179,7 @@ export class ModelLoader extends CommonLoader {
 
     public showVoxelModel() {
         this._handle.renderVoxelModel()
-        this.testSelectVoxel();
+        // this.testSelectVoxel();
     }
 
     public hideVoxelModel() {
@@ -333,7 +335,7 @@ export class ModelLoader extends CommonLoader {
             }
         }
     }
-    private testSelectVoxel() {
+    private testSelectVoxel(voxelMeshes: THREE.Object3D[]) {
         const mouse = new THREE.Vector2();
         const camera = this._camera?.get();
         const scene = this._scene?.get();
@@ -349,7 +351,7 @@ export class ModelLoader extends CommonLoader {
             const vector = new THREE.Vector3(mouse.x, mouse.y, 1);
             const data = vector.unproject(camera);
             const ray = new THREE.Raycaster(camera.position, data.sub(camera.position).normalize());
-            const intersects = ray.intersectObjects(scene.children);
+            const intersects = ray.intersectObjects(voxelMeshes);
     
             let newHoverMesh: THREE.Mesh | null = null;
             for (let i = 0; i < intersects.length; i++) {

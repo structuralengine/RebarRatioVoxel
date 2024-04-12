@@ -89,4 +89,8 @@ export class ModelElement {
         this.boundingBoxConcrete.getSize(size)
         this.concreteVolume = size.x * size.y * size.z;
     }
+    public getVoxelMeshes(): THREE.Object3D[] {
+        return this.voxelModelData.map(data => data.mesh);
+    }
 }
+
