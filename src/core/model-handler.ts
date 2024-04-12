@@ -42,6 +42,16 @@ export class ModelHandler {
 
     }
 
+    public reSetupVoxel() {
+        this._modelLoader.getElement().voxelModelData.forEach((voxel: VoxelModelData) => {
+            this._modelLoader.getScene()?.get().remove(voxel.mesh)
+        })
+        this.voxelizeModel()
+        this._modelLoader.getElement().voxelModelData.forEach((voxel: VoxelModelData) => {
+            this._modelLoader.getScene()?.get().add(voxel.mesh)
+        })
+    }
+
     public async voxelizeModel() {
         const modelElement = this._modelLoader.getElement();
         const concreteList = modelElement.concreteList;
