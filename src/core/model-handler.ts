@@ -92,15 +92,15 @@ export class ModelHandler {
                     box.max.setScalar( gridSize ).add( centerPoint );
 
                     for (const mesh of concreteList) {
-                        // if (this.checkCollision(centerPoint, mesh, maxDistance)) {
-                        //     modelElement.voxelModelData.push(new VoxelModelData(centerPoint, boxSize, boxRoundness));
-                        //     break;
-                        // }
-
-                        if (this.checkCollision2(box, mesh)) {
+                        if (this.checkCollision(centerPoint, mesh, maxDistance)) {
                             modelElement.voxelModelData.push(new VoxelModelData(centerPoint, boxSize, boxRoundness));
                             break;
                         }
+
+                        // if (this.checkCollision2(box, mesh)) {
+                        //     modelElement.voxelModelData.push(new VoxelModelData(centerPoint, boxSize, boxRoundness));
+                        //     break;
+                        // }
                     }
 
                     // const voxel = new VoxelModelData(centerPoint, boxSize, boxRoundness);
@@ -185,12 +185,8 @@ export class ModelHandler {
                 const value = this.shapeCast(rebar, firstMesh, voxel.boxSize);
 
                 if (value) {
-
                     voxel.reBarList.push(rebar)
                     count++;
-
-
-
                     // const box = new THREE.Box3().setFromObject(rebar);
                     // const helper = new THREE.BoxHelper(rebar, 0xffff00);
                     // this._modelLoader.getScene()?.get().add(helper);
@@ -199,8 +195,16 @@ export class ModelHandler {
             })
 
             console.log('---------------------------------------', count)
-            if (count > 5) {
-                firstMesh.material.color.set(0xff0000)
+            if (count > 0 && count <= 2) {
+                firstMesh.material.color.set('#00ffec')
+            } else if (count > 2 && count <= 4) {
+                firstMesh.material.color.set('#0228ac')
+            }
+            else if (count > 4 && count <= 6) {
+                firstMesh.material.color.set('#afb300')
+            }
+            else if (count > 6) {
+                firstMesh.material.color.set('#c70000')
             }
         });
 
@@ -208,6 +212,12 @@ export class ModelHandler {
     }
 
     private shapeCast(targetMesh: FragmentMesh, shape: THREE.Mesh, size: number) {
+        const firstBB = new THREE.Box3().setFromObject(targetMesh);
+
+        const secondBB = new THREE.Box3().setFromObject(shape);
+
+        return firstBB.intersectsBox(secondBB);
+
         const transformMatrix =
             new THREE.Matrix4()
                 .copy( targetMesh.matrixWorld )
