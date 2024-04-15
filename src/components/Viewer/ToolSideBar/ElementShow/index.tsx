@@ -118,7 +118,6 @@ const ElementShow = () => {
 
     return (
         <>
-            <br />
             <div className='header'>Element show</div>
             <div className='body'>
                 <div className='element-show-container'>
