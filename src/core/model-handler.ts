@@ -31,6 +31,12 @@ const rays = [
     new THREE.Vector3(-1, -1, -1) // Bottom-Left-Back
 ];
 
+const materialColorlist = [
+    { color: 0x09e8cd, label: 'Color 1' },
+    { color: 0x09e810, label: 'Color 2' },
+    { color: 0xe8de09, label: 'Color 3' },
+    { color: 0xe80909, label: 'Color 4' }
+]
 export class ModelHandler {
     private _modelLoader: ModelLoader
 
@@ -93,21 +99,21 @@ export class ModelHandler {
                             const reinforcingBarInVoxel = this.geAllCollidingObjects(newVoxel.mesh);
                             const l = reinforcingBarInVoxel.length;
                             const hoverMesh = newVoxel.mesh.children[1] as THREE.Mesh
-                            let c = 0x00d4ff;
-                            if (l > 0 && l < 2) {
-                              c = 0x09e8cd;
-                            } else if (l >= 2 && l < 5) {
-                              c = 0x09e810;
-                            } else if (l >= 5 && l < 8) {
-                              c = 0xe8de09;
-                            } else if (l >= 8 && l < 10) {
-                              c = 0xe80909;
-                            } else if ( l >= 10) {
-                              c = 0xe80909;
+                            let color = 0x00d4ff;
+                            for (const colorItem of materialColorlist) {
+                                if (l > 0 && l < 2 && colorItem.label === 'Color 1') {
+                                    color = colorItem.color;
+                                } else if (l >= 2 && l < 5 && colorItem.label === 'Color 2') {
+                                    color = colorItem.color;
+                                } else if (l >= 5 && l < 8 && colorItem.label === 'Color 3') {
+                                    color = colorItem.color;
+                                } else if (l >= 8 && l < 10 && colorItem.label === 'Color 4') {
+                                    color = colorItem.color;
+                                } else if (l >= 10 && colorItem.label === 'Color 4') {
+                                    color = colorItem.color;
+                                }
                             }
-                            hoverMesh.material.color.set(c);
-                            console.log(newVoxel)
-                            console.log(reinforcingBarInVoxel.length)
+                            hoverMesh.material.color.set(color);
                             break;
                         }
                     }
@@ -118,6 +124,21 @@ export class ModelHandler {
         const timestampEnd = new Date().getTime();
         console.log(`Success took ${timestampEnd - timestampStart} ms`, modelElement.voxelModelData);
 
+    }
+
+    private geAllCollidingObjects(mesh:THREE.Object3D) {
+        const fromMeshes = this._modelLoader.getElement().reinforcingBarList;//returns all Boxes of the scene
+        const boundary = new THREE.Box3().setFromObject(mesh);
+        const collidingObjs:THREE.Object3D[]=[];
+        fromMeshes.forEach((meshNow:THREE.Object3D)=>
+        {
+            const otherBounds = new THREE.Box3().setFromObject(meshNow);
+            if(boundary.intersectsBox(otherBounds))
+            {
+                collidingObjs.push(meshNow)
+            }
+        });
+        return collidingObjs;
     }
 
     private geAllCollidingObjects(mesh:THREE.Object3D) {
@@ -163,4 +184,5 @@ export class ModelHandler {
             }
         })
     }
+
 }

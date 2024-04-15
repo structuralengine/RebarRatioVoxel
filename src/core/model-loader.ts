@@ -5,8 +5,8 @@ import { Fragment, FragmentMesh } from "bim-fragment";
 import { CommonLoader } from "./common-loader.ts";
 import { ModelHandler } from "./model-handler.ts";
 import { IFCBUILDINGELEMENTPROXY, IFCREINFORCINGBAR } from "web-ifc";
-import { ModelElement } from "./model-element.ts";
-
+import {ModelElement, VoxelModelData} from "./model-element.ts";
+import { add } from 'three/examples/jsm/libs/tween.module.js';
 export const defaultVolume = 300;
 export const defaultGridSize = 0.5;
 
@@ -228,7 +228,7 @@ export class ModelLoader extends CommonLoader {
     public hideVoxelModel() {
         this._handle.renderVoxelModel(false)
     }
-
+    
     public async filterReinforcingBar() {
         if (this._groupModel) {
             const proProxies = await this._groupModel?.getAllPropertiesOfType(IFCBUILDINGELEMENTPROXY)
@@ -376,6 +376,28 @@ export class ModelLoader extends CommonLoader {
                     break
                 }
             }
+        }
+    }
+
+    public showVoxelByColor(type: number) {
+        const scene = this.getScene()?.get();
+        const modelElement = this.getElement();
+        if (scene && modelElement) {
+            const filteredVoxels = modelElement.voxelModelData.filter(voxel => voxel.mesh.children[1].material.color.getHex() === type);
+            filteredVoxels.forEach(voxel => {
+                scene.add(voxel.mesh);
+            });
+        }
+    }
+
+    public hideVoxelByColor(type: number) {
+        const scene = this.getScene()?.get();
+        const modelElement = this.getElement();
+        if (scene && modelElement) {
+            const filteredVoxels = modelElement.voxelModelData.filter(voxel => voxel.mesh.children[1].material.color.getHex() === type);
+            filteredVoxels.forEach(voxel => {
+                scene.remove(voxel.mesh);
+            });
         }
     }
 }
