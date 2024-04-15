@@ -98,28 +98,22 @@ export class ModelHandler {
                             modelElement.voxelModelData.push(newVoxel);
                             const reinforcingBarInVoxel = this.geAllCollidingObjects(newVoxel.mesh);
                             const l = reinforcingBarInVoxel.length;
-                            if(l >= 6){
-                                reinforcingBarInVoxel.forEach(element => {
-                                    element.material.color.set(0xe80909);
-                                });
+                            const hoverMesh = newVoxel.mesh.children[1] as THREE.Mesh
+                            let color = 0x00d4ff;
+                            for (const colorItem of materialColorlist) {
+                                if (l > 0 && l < 2 && colorItem.label === 'Color 1') {
+                                    color = colorItem.color;
+                                } else if (l >= 2 && l < 5 && colorItem.label === 'Color 2') {
+                                    color = colorItem.color;
+                                } else if (l >= 5 && l < 8 && colorItem.label === 'Color 3') {
+                                    color = colorItem.color;
+                                } else if (l >= 8 && l < 10 && colorItem.label === 'Color 4') {
+                                    color = colorItem.color;
+                                } else if (l >= 10 && colorItem.label === 'Color 4') {
+                                    color = colorItem.color;
+                                }
                             }
-
-                            // const hoverMesh = newVoxel.mesh.children[1] as THREE.Mesh
-                            // let color = 0x00d4ff;
-                            // for (const colorItem of materialColorlist) {
-                            //     if (l > 0 && l < 2 && colorItem.label === 'Color 1') {
-                            //         color = colorItem.color;
-                            //     } else if (l >= 2 && l < 5 && colorItem.label === 'Color 2') {
-                            //         color = colorItem.color;
-                            //     } else if (l >= 5 && l < 8 && colorItem.label === 'Color 3') {
-                            //         color = colorItem.color;
-                            //     } else if (l >= 8 && l < 10 && colorItem.label === 'Color 4') {
-                            //         color = colorItem.color;
-                            //     } else if (l >= 10 && colorItem.label === 'Color 4') {
-                            //         color = colorItem.color;
-                            //     }
-                            // }
-                            // hoverMesh.material.color.set(color);
+                            hoverMesh.material.color.set(color);
                             break;
                         }
                     }
