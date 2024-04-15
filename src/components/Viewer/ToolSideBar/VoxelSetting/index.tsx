@@ -12,7 +12,7 @@ const VoxelSetting = () => {
     const [data, setData] = useState<DataProps>({
         gridSize: 0,
         boxSize: 0,
-        boxRoundness: 0, 
+        boxRoundness: 0,
     })
     const [minGrid, setMinGrid] = useState<number>(0.1)
 
@@ -74,7 +74,11 @@ const VoxelSetting = () => {
         }
 
         setData(postData)
-        modelLoader?.settings.setupSetting(postData)
+
+    }
+
+    const handleApplySetting = () => {
+        modelLoader?.settings.setupSetting(data)
         modelLoader?.reSetupLoadModel()
         setIsSetting(true)
     }
@@ -92,6 +96,9 @@ const VoxelSetting = () => {
                         </div>
                     </div>
                 )}
+                <div className='button-setting'>
+                    <button className='button'onClick={() => handleApplySetting()}>Apply</button>
+                </div>
             </div>
         </>
     );

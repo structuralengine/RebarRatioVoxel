@@ -38,8 +38,8 @@ export class ModelSetting {
 
     private calculateScale(volume: number) {
         const volumeScaleMap = [
-            { volume: 300, scale: 0.4 },
-            { volume: 1000, scale: 0.5 },
+            { volume: 300, scale: 0.2 },
+            { volume: 1000, scale: 0.3 },
             { volume: 2000, scale: 0.6 },
             { volume: 3000, scale: 0.7 },
             { volume: 4000, scale: 0.8 },
