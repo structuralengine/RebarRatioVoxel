@@ -1,14 +1,18 @@
-import {createContext} from "react";
-import {ModelLoader} from "../core";
+import { createContext } from "react";
+import { ModelLoader } from "../core";
 
 export const ViewerContext =
     createContext<ViewerContextProps>(
         {
             loaded: undefined,
-            setLoaded: () => {},
+            setLoaded: () => { },
             modelLoader: undefined,
-            setModelLoader: () => {},
-            closeViewer: () => {}
+            setModelLoader: () => { },
+            closeViewer: () => { },
+            voxelized: undefined,
+            setVoxelized: () => { },
+            isSetting: undefined,
+            setIsSetting: () => {},
         });
 
 export interface ViewerContextProps {
@@ -16,5 +20,9 @@ export interface ViewerContextProps {
     setLoaded: (value?: boolean) => void
     modelLoader?: ModelLoader,
     setModelLoader?: (loader?: ModelLoader) => void
-    closeViewer: () => void
+    closeViewer: () => void,
+    voxelized?: boolean,
+    setVoxelized: (value?: boolean) => void,
+    isSetting?: boolean,
+    setIsSetting: (value?: boolean) => void,
 }
