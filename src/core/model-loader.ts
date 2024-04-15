@@ -177,6 +177,7 @@ export class ModelLoader extends CommonLoader {
 
     public showVoxelModel() {
         this._handle.renderVoxelModel()
+        this._handle.detectRebarAndVoxel();
     }
 
     public hideVoxelModel() {
@@ -192,10 +193,19 @@ export class ModelLoader extends CommonLoader {
                 const fragmentIdList = this._groupModel.getFragmentMap(expressIDArray);
                 const idKeys = Object.keys(fragmentIdList)
                 this._elements.concreteList = this._groupModel.children.filter((f) => idKeys.find(id => id === f.uuid) !== undefined) as FragmentMesh[]
-                this._elements.reinforcingBarList = this._groupModel.children.filter((f) => idKeys.find(id => id === f.uuid) === undefined) as FragmentMesh[]
-                this._elements.setup();
-                this.settings.setup(this._elements.concreteVolume);
             }
+
+            const proReBar = await this._groupModel?.getAllPropertiesOfType(IFCREINFORCINGBAR)
+            if (proReBar) {
+                const valueOfObjects = Object.values(proReBar)
+                const expressIDArray = valueOfObjects.map((d) => d.expressID)
+                const fragmentIdList = this._groupModel.getFragmentMap(expressIDArray);
+                const idKeys = Object.keys(fragmentIdList)
+                this._elements.reinforcingBarList = this._groupModel.children.filter((f) => idKeys.find(id => id === f.uuid) !== undefined) as FragmentMesh[]
+            }
+
+            this._elements.setup();
+            this.settings.setup(this._elements.concreteVolume);
         }
     }
 
@@ -297,7 +307,7 @@ export class ModelLoader extends CommonLoader {
         if (scene && model) {
             switch (type) {
                 case IFCREINFORCINGBAR: {
-                    this._elements.reinforcingBarList.forEach((item: FragmentMesh) => {
+                    this._elements.reinforcingBarList.filter((item) => item.count === 569).forEach((item: FragmentMesh) => {
                         scene.add(item)
                     })
                     break

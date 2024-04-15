@@ -2,6 +2,7 @@ import * as THREE from "three";
 import {ModelLoader} from "./model-loader.ts";
 import {FragmentMesh} from "bim-fragment";
 import {RoundedBoxGeometry} from "three/examples/jsm/geometries/RoundedBoxGeometry.js";
+import {BoxGeometry} from "three";
 
 export const voxelEdgeMaterial = new THREE.LineBasicMaterial({ color: '#3c3c3c', opacity: 0.4 });
 export const voxelMaterial = new THREE.MeshBasicMaterial({ color: '#057400', opacity: 0.4, transparent: true });
@@ -12,6 +13,7 @@ export class VoxelModelData {
     public boxSize: number
     public boxRoundness: number
     public mesh: THREE.Object3D
+    public reBarList: FragmentMesh[]
 
     constructor(center: THREE.Vector3, boxSize: number, boxRoundness: number = 0) {
         this.center = center;
@@ -19,9 +21,11 @@ export class VoxelModelData {
         this.boxRoundness = boxRoundness;
         this.mesh = this.createVoxelMesh(center, boxSize, boxRoundness);
         this.id = this.mesh.uuid;
+        this.reBarList = [];
     }
 
     private createVoxelMesh(pointCenter: THREE.Vector3, boxSize: number, boxRoundness: number = 0): THREE.Object3D {
+        // const geometry = new BoxGeometry(boxSize, boxSize, boxSize)
         const geometry = new RoundedBoxGeometry(boxSize, boxSize, boxSize, 1, boxRoundness)
 
         const edges = new THREE.EdgesGeometry(geometry);
@@ -31,6 +35,12 @@ export class VoxelModelData {
 
         const voxelBlock = new THREE.Mesh(geometry, voxelMaterial.clone());
         voxelBlock.position.copy(pointCenter);
+        voxelBlock.applyMatrix4(line.matrixWorld.clone())
+        voxelBlock.updateMatrix()
+        voxelBlock.updateMatrixWorld()
+        voxelBlock.geometry.computeBoundingBox()
+        voxelBlock.geometry.computeBoundingSphere()
+
 
         const mergedObject = new THREE.Object3D();
         mergedObject.add(line)
@@ -66,13 +76,12 @@ export class ModelElement {
     public setup() {
         this.boundingBoxConcrete = new THREE.Box3();
         for (const concrete of this.concreteList) {
+            console.log('----------------- ', concrete)
             concrete.computeBoundingBox();
             concrete.computeBoundingSphere();
 
             concrete.geometry.computeBoundingBox()
             concrete.geometry.computeBoundingSphere()
-            concrete.geometry.computeTangents()
-            concrete.geometry.computeVertexNormals()
 
             if (concrete.boundingBox) {
                 concrete.geometry.boundingBox = concrete.boundingBox.clone()
