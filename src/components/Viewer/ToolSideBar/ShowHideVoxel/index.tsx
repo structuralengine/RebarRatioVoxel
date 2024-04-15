@@ -130,11 +130,12 @@ const ShowHideVoxelElement = () => {
     }, [modelLoader])
 
     return (
-        <div className='element-show-container'>
-            <br />
-            <h4 style={{ textAlign: 'center', width: '100%', display: 'inline-block' }}>Show/Hide Voxel</h4>
+        <>
+        <div className='header'>Show/Hide Voxel by Color</div>
+           <div className='body'>
             {menuItem.map((item: ItemElementType) => <ShowHideVoxel key={item.id} id={item.id} name={item.name} isShow={item.isShow} onChange={handleOnChangeShow} onShow={handleShowModel} onRemove={handleRemoveModel} />)}
         </div>
+        </>
     );
 };
 
