@@ -13,14 +13,16 @@ export class VoxelModelData {
     public center: THREE.Vector3
     public boxSize: number
     public boxRoundness: number
+    public transparent: number
     public mesh: THREE.Object3D
     public reBarList: FragmentMesh[]
 
-    constructor(center: THREE.Vector3, boxSize: number, boxRoundness: number = 0) {
+    constructor(center: THREE.Vector3, boxSize: number, boxRoundness: number = 0, transparent: number) {
         this.center = center;
         this.boxSize = boxSize;
         this.boxRoundness = boxRoundness;
-        this.mesh = this.createVoxelMesh(center, boxSize, boxRoundness);
+        this.transparent = transparent
+        this.mesh = this.createVoxelMesh(center, boxSize, boxRoundness, transparent);
         this.id = this.mesh.uuid;
         this.reBarList = [];
     }

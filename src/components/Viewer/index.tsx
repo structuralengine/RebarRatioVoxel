@@ -6,10 +6,11 @@ import ModelLoading from "./ModelLoading.tsx";
 import { ViewerContext } from "../../contexts";
 import UiControl from "./UiControl.tsx";
 import { IFCBUILDINGELEMENTPROXY } from "web-ifc";
+import { DataSettingsProps } from "./ToolSideBar/VoxelSetting/index.tsx";
 const Viewer = () => {
     const viewerRef = useRef<HTMLDivElement | null>(null)
     const [loaded, setLoaded] = useState<boolean | undefined>(undefined)
-    const [isSetting, setIsSetting] = useState<boolean | undefined>(undefined)
+    const [isSetting, setIsSetting] = useState<DataSettingsProps | undefined>(undefined)
     const [modelLoader, setModelLoader] = useState<ModelLoader | undefined>(undefined);
     const [voxelized, setVoxelized] = useState<boolean | undefined>(undefined)
 
@@ -25,10 +26,34 @@ const Viewer = () => {
         }
     }, [voxelized, modelLoader])
 
+    // useEffect(() => {
+    //     console.log('loaded', loaded)
+    //     console.log('isSetting', isSetting)
+    //     if (isSetting && loaded === false) {
+    //         // modelLoader?.settings.setupSetting(isSetting)
+    //         // modelLoader?.reSetupLoadModel()
+    //         Promise.all([modelLoader?.reSetupLoadModel()])
+    //         // if (response?.isSuccess) {
+    //             setLoaded(true)
+    //             setIsSetting(undefined)
+    //         // }
+    //     }
+    // }, [isSetting, loaded])
+
+    const handleVoxelModel = (value: boolean | undefined) => {
+        if (value) {
+            setLoaded(false)
+        } else {
+            setLoaded(undefined)
+        }
+        setVoxelized(value)
+
+    }
+
     const handleGetFileFromDrop = useCallback(async (file: File) => {
         if (viewerRef?.current !== null) {
             setLoaded(false)
-            const loader = new ModelLoader(viewerRef.current, file, (value) => setVoxelized(value), cleanUpViewer);
+            const loader = new ModelLoader(viewerRef.current, file, (value) => handleVoxelModel(value), cleanUpViewer);
             const isLoaded = await loader.setup();
             if (isLoaded) {
                 setLoaded(true)
@@ -48,6 +73,8 @@ const Viewer = () => {
 
         setModelLoader(undefined)
         setLoaded(undefined)
+        setVoxelized(undefined)
+        setIsSetting(undefined)
         if (viewerRef.current) {
             viewerRef.current.innerHTML = '';
             viewerRef.current.classList.remove('obc-viewer');

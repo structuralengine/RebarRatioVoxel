@@ -1,6 +1,6 @@
 import { useState } from "react";
 import ElementShow from "./ToolSideBar/ElementShow";
-import ShowHideVoxel from "./ToolSideBar/ShowHideVoxel";
+import ShowHideVoxelElement from "./ToolSideBar/ShowHideVoxel";
 import VoxelSetting from "./ToolSideBar/VoxelSetting";
 
 
@@ -20,8 +20,8 @@ const [isVoxelChecked, setIsVoxelChecked] = useState<boolean>(false);
                     <div className='header'>Controls</div>
                     <div className='body'>
                       <VoxelSetting />
-                      <ElementShow setIsVoxelChecked={setIsVoxelChecked}/>
-                      {isVoxelChecked && <ShowHideVoxel />}
+                      <ShowHideVoxelElement />
+                      <ElementShow />
                     </div>
                 </>
             }

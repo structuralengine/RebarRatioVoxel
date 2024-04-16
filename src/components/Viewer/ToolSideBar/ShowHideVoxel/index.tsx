@@ -139,18 +139,10 @@ const ShowHideVoxelElement = () => {
 
     return (
         <>
-            <div className='header'>Show/Hide Voxel By Color</div>
-            <div className='body'>
-                <div className='element-show-container'>
-                    {menuItem.map((item: ItemElementType) =>
-                        <ShowHideVoxel key={item.id} id={item.id} name={item.name} isShow={item.isShow}
-                            onChange={handleOnChangeShow}
-                            onShow={handleShowModel}
-                            onRemove={handleRemoveModel}
-                        />
-                    )}
-                </div>
-            </div>
+        <div className='header'>Show/Hide Voxel by Color</div>
+           <div className='body'>
+            {menuItem.map((item: ItemElementType) => <ShowHideVoxel key={item.id} id={item.id} name={item.name} isShow={item.isShow} onChange={handleOnChangeShow} onShow={handleShowModel} onRemove={handleRemoveModel} />)}
+        </div>
         </>
     );
 };

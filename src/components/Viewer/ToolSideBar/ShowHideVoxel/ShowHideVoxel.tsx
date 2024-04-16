@@ -1,4 +1,4 @@
-import {ChangeEvent, useCallback, useEffect} from 'react';
+import { ChangeEvent, useCallback, useEffect } from 'react';
 
 export type ItemElementType = {
     id: string
@@ -9,7 +9,7 @@ export type ItemElementType = {
     onRemove?: (id: string) => void
 }
 
-const ShowHideVoxel = ({id, name, isShow, onChange, onShow, onRemove}: ItemElementType) => {
+const ShowHideVoxel = ({ id, name, isShow, onChange, onShow, onRemove }: ItemElementType) => {
 
     useEffect(() => {
         if (isShow) {
@@ -29,8 +29,8 @@ const ShowHideVoxel = ({id, name, isShow, onChange, onShow, onRemove}: ItemEleme
 
     return (
         <div>
-            <input type="checkbox" id={id} className='checkbox' name="checkbox" checked={isShow} onChange={handleOnChange}/>
-            <label className='element' htmlFor={id}> {name}</label>
+            <input type="checkbox" id={id} className="checkbox" checked={isShow} onChange={handleOnChange} />
+            <label htmlFor={id}><div className="square element" style={{ background: `${name.replace('0x', '#')}`, padding: `${name === 'All' ? 0 : '6px'}` }}>{name === 'All' && name}</div></label>
         </div>
     );
 };

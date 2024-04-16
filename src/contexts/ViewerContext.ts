@@ -1,5 +1,6 @@
 import { createContext } from "react";
 import { ModelLoader } from "../core";
+import { DataSettingsProps } from "../components/Viewer/ToolSideBar/VoxelSetting";
 
 export const ViewerContext =
     createContext<ViewerContextProps>(
@@ -23,6 +24,6 @@ export interface ViewerContextProps {
     closeViewer: () => void,
     voxelized?: boolean,
     setVoxelized: (value?: boolean) => void,
-    isSetting?: boolean,
-    setIsSetting: (value?: boolean) => void,
+    isSetting?: DataSettingsProps,
+    setIsSetting: (value?: DataSettingsProps) => void,
 }
