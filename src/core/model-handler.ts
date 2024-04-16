@@ -237,7 +237,7 @@ export class ModelHandler {
                 box.max.setScalar( voxel.boxSize ).add( voxel.center );
 
                 const geometry = rebar.convertGeometry;
-                const value = this.shapeCast(rebar, geometry, firstMesh, voxel.boxSize);
+                const value = this.shapeCast(rebar, geometry, firstMesh, voxel);
 
                 if (value) {
                     voxel.reBarList.push(rebar)
@@ -260,19 +260,16 @@ export class ModelHandler {
         });
     }
 
-    private shapeCast(targetMesh: FragmentMesh, geometry: BufferGeometry, shape: THREE.Mesh, boxSize: number) {
+    private shapeCast(targetMesh: FragmentMesh, geometry: BufferGeometry, shape: THREE.Mesh, voxel: VoxelModelData) {
         const transformMatrix =
             new THREE.Matrix4()
                 .copy( targetMesh.matrixWorld ).invert()
                 .multiply( shape.matrixWorld );
 
         const box = new THREE.Box3();
-        box.min.set( -boxSize, -boxSize, -boxSize);
-        box.max.set( boxSize, boxSize, boxSize);
-
+        box.min.set( -voxel.boxSize/2,-voxel.boxSize/2,-voxel.boxSize/2 );
+        box.max.set( voxel.boxSize/2,voxel.boxSize/2,voxel.boxSize/2 );
         return geometry.boundsTree.intersectsBox( box, transformMatrix );
-        // const invMat = new THREE.Matrix4().copy(targetMesh.matrixWorld).invert();
-        // return geometry.boundsTree.intersectsBox( box, invMat );
     }
 
 }
