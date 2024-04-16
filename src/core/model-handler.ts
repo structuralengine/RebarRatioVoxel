@@ -63,7 +63,7 @@ export class ModelHandler {
 
         // Test bounding box
         // const boxHelper = new THREE.Box3Helper(boundingBoxOfConcrete, 0xffff00);
-        //this._modelLoader.getScene()?.get().add(boxHelper);
+        // this._modelLoader.getScene()?.get().add(boxHelper);
 
         // Traverse mesh
         for (const concrete of concreteList) {
@@ -85,8 +85,6 @@ export class ModelHandler {
         const maxDistance = Math.sqrt(3) * gridSize / 2;
         console.log('rays', rays)
         modelElement.voxelModelData = [];
-
-        const resolution = this._modelLoader.settings.gridSize;
 
         const minX = boundingBoxOfConcrete.min.x
         const minY = boundingBoxOfConcrete.min.y

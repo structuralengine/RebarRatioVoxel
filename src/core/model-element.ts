@@ -2,7 +2,6 @@ import * as THREE from "three";
 import {ModelLoader} from "./model-loader.ts";
 import {FragmentMesh} from "bim-fragment";
 import {RoundedBoxGeometry} from "three/examples/jsm/geometries/RoundedBoxGeometry.js";
-import {BoxGeometry} from "three";
 import {MeshBVH} from "three-mesh-bvh";
 
 export const voxelEdgeMaterial = new THREE.LineBasicMaterial({ color: '#3c3c3c', opacity: 0.4 });
