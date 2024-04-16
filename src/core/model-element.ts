@@ -2,6 +2,8 @@ import * as THREE from "three";
 import {ModelLoader} from "./model-loader.ts";
 import {FragmentMesh} from "bim-fragment";
 import {RoundedBoxGeometry} from "three/examples/jsm/geometries/RoundedBoxGeometry.js";
+import {BoxGeometry} from "three";
+import {MeshBVH} from "three-mesh-bvh";
 
 export const voxelEdgeMaterial = new THREE.LineBasicMaterial({ color: '#3c3c3c', opacity: 0.4 });
 export const voxelMaterial = new THREE.MeshBasicMaterial({ color: '#057400', opacity: 0.4, transparent: true });
@@ -12,6 +14,7 @@ export class VoxelModelData {
     public boxSize: number
     public boxRoundness: number
     public mesh: THREE.Object3D
+    public reBarList: FragmentMesh[]
 
     constructor(center: THREE.Vector3, boxSize: number, boxRoundness: number = 0) {
         this.center = center;
@@ -19,9 +22,11 @@ export class VoxelModelData {
         this.boxRoundness = boxRoundness;
         this.mesh = this.createVoxelMesh(center, boxSize, boxRoundness);
         this.id = this.mesh.uuid;
+        this.reBarList = [];
     }
 
     private createVoxelMesh(pointCenter: THREE.Vector3, boxSize: number, boxRoundness: number = 0): THREE.Object3D {
+        // const geometry = new BoxGeometry(boxSize, boxSize, boxSize)
         const geometry = new RoundedBoxGeometry(boxSize, boxSize, boxSize, 1, boxRoundness)
 
         const edges = new THREE.EdgesGeometry(geometry);
@@ -31,6 +36,12 @@ export class VoxelModelData {
 
         const voxelBlock = new THREE.Mesh(geometry, voxelMaterial.clone());
         voxelBlock.position.copy(pointCenter);
+        voxelBlock.applyMatrix4(line.matrixWorld.clone())
+        voxelBlock.updateMatrix()
+        voxelBlock.updateMatrixWorld()
+        voxelBlock.geometry.computeBoundingBox()
+        voxelBlock.geometry.computeBoundingSphere()
+
 
         const mergedObject = new THREE.Object3D();
         mergedObject.add(line)
@@ -66,27 +77,73 @@ export class ModelElement {
     public setup() {
         this.boundingBoxConcrete = new THREE.Box3();
         for (const concrete of this.concreteList) {
+            console.log('concrete info', concrete)
             concrete.computeBoundingBox();
             concrete.computeBoundingSphere();
 
             concrete.geometry.computeBoundingBox()
             concrete.geometry.computeBoundingSphere()
-            concrete.geometry.computeTangents()
-            concrete.geometry.computeVertexNormals()
 
             if (concrete.boundingBox) {
                 concrete.geometry.boundingBox = concrete.boundingBox.clone()
                 const boundingSphere = new THREE.Sphere();
                 concrete.boundingBox.clone().getBoundingSphere(boundingSphere);
                 concrete.geometry.boundingSphere = boundingSphere
+
+                concrete.geometry.attributes.normal.needsUpdate = true;
+                concrete.geometry.attributes.position.needsUpdate = true;
             }
 
             const objectBoundingBox = new THREE.Box3().setFromObject(concrete);
             this.boundingBoxConcrete.union(objectBoundingBox);
+
+            concrete.convertGeometry = this.renderConvertGeometry(concrete);
         }
 
         const size = new THREE.Vector3();
         this.boundingBoxConcrete.getSize(size)
         this.concreteVolume = size.x * size.y * size.z;
+
+        for (const rebar of this.reinforcingBarList) {
+            rebar.computeBoundingBox();
+            rebar.computeBoundingSphere();
+
+            rebar.geometry.computeBoundingBox()
+            rebar.geometry.computeBoundingSphere()
+
+            if (rebar.boundingBox) {
+                rebar.geometry.boundingBox = rebar.boundingBox.clone()
+                const boundingSphere = new THREE.Sphere();
+                rebar.boundingBox.clone().getBoundingSphere(boundingSphere);
+                rebar.geometry.boundingSphere = boundingSphere
+
+                rebar.geometry.attributes.normal.needsUpdate = true;
+                rebar.geometry.attributes.position.needsUpdate = true;
+            }
+
+            rebar.convertGeometry = this.renderConvertGeometry(rebar);
+        }
+    }
+
+    private renderConvertGeometry(mesh: FragmentMesh) {
+        const convertGeometry =  mesh.geometry.clone();
+        const instanceMatrix = mesh.instanceMatrix.array;
+        const numInstances = instanceMatrix.length / 16;
+        for (let i = 0; i < numInstances; i++) {
+            const instanceIndex = i * 16;
+            const matrix = new THREE.Matrix4();
+            matrix.fromArray(instanceMatrix.slice(instanceIndex, instanceIndex + 16));
+
+            convertGeometry.attributes.position.applyMatrix4(matrix);
+            convertGeometry.attributes.position.needsUpdate = true;
+
+            convertGeometry.attributes.normal = mesh.geometry.attributes.normal.clone();
+            convertGeometry.attributes.normal.applyMatrix4(matrix);
+            convertGeometry.attributes.normal.needsUpdate = true;
+        }
+        convertGeometry.computeBoundingBox()
+        convertGeometry.computeBoundingSphere()
+        convertGeometry.boundsTree = new MeshBVH(convertGeometry);
+        return  convertGeometry;
     }
 }

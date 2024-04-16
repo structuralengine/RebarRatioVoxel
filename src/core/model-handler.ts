@@ -2,6 +2,8 @@ import * as THREE from "three";
 import {ModelLoader} from "./model-loader.ts";
 import {FragmentMesh} from "bim-fragment";
 import {VoxelModelData} from "./model-element.ts";
+import {MeshBVH, MeshBVHHelper} from "three-mesh-bvh";
+import {Box3, BufferGeometry, LineSegments} from "three";
 
 const rays = [
     // ray directions to the center of voxel
@@ -83,17 +85,27 @@ export class ModelHandler {
         const boxSize = this._modelLoader.settings.boxSize;
         const boxRoundness = this._modelLoader.settings.boxRoundness;
         const maxDistance = Math.sqrt(3) * gridSize / 2;
-        console.log('------ concreteList', concreteList);
         console.log('rays', rays)
         modelElement.voxelModelData = [];
 
-        for (let x = boundingBoxOfConcrete.min.x; x <= boundingBoxOfConcrete.max.x + gridSize; x += gridSize) {
-            for (let y = boundingBoxOfConcrete.min.y; y <= boundingBoxOfConcrete.max.y + gridSize; y += gridSize) {
-                for (let z = boundingBoxOfConcrete.min.z; z <= boundingBoxOfConcrete.max.z + gridSize; z += gridSize) {
+        for (let x = boundingBoxOfConcrete.min.x; x <= boundingBoxOfConcrete.max.x; x += gridSize) {
+            for (let y = boundingBoxOfConcrete.min.y; y <= boundingBoxOfConcrete.max.y; y += gridSize) {
+                for (let z = boundingBoxOfConcrete.min.z; z <= boundingBoxOfConcrete.max.z; z += gridSize) {
                     const centerPoint = new THREE.Vector3(x + gridSize / 2, y + gridSize / 2, z + gridSize / 2);
+                    const box = new THREE.Box3()
+                    box.min.setScalar( -gridSize/2 ).add( centerPoint );
+                    box.max.setScalar( gridSize/2 ).add( centerPoint );
 
-                    for (const mesh of concreteList) {
-                        if (this.isInsideMesh(mesh, centerPoint) || this.checkCollision(centerPoint, mesh, maxDistance) ) {
+                    for (let i = 0; i < concreteList.length; i++) {
+                        const mesh = concreteList[i];
+                        const geometry = mesh.convertGeometry;
+
+                        // if (this.checkCollision(centerPoint, mesh, maxDistance)) {
+                        //     modelElement.voxelModelData.push(new VoxelModelData(centerPoint, boxSize, boxRoundness));
+                        //     break;
+                        // }
+
+                        if (this.checkCollisionByBVH(centerPoint, box, mesh, geometry)) {
                             const newVoxel = new VoxelModelData(centerPoint, boxSize, boxRoundness);
                             modelElement.voxelModelData.push(newVoxel);
                             const reinforcingBarInVoxel = this.geAllCollidingObjects(newVoxel.mesh);
@@ -160,10 +172,44 @@ export class ModelHandler {
         return false;
     }
 
-    private isInsideMesh(mesh: FragmentMesh, point: THREE.Vector3): boolean {
-        const raycaster = new THREE.Raycaster(point, new THREE.Vector3(1, 0, 0));
-        const intersects = raycaster.intersectObject(mesh);
-        return intersects.length % 2 === 1; 
+    private checkCollisionByBVH(center: THREE.Vector3, box: THREE.Box3, model: FragmentMesh, geometry: BufferGeometry) {
+
+        const invMat = new THREE.Matrix4().copy( model.matrixWorld.clone() ).invert();
+        const res = geometry.boundsTree.intersectsBox( box, invMat );
+
+        const rayX = new THREE.Ray();
+        rayX.direction.set( 1, 0, 0 );
+
+        const rayY = new THREE.Ray();
+        rayY.direction.set( 0, 1, 0 );
+
+        const rayZ = new THREE.Ray();
+        rayZ.direction.set( 0, 0, 1 );
+
+        if (res) {
+            return true;
+        } else {
+            rayX.origin.copy( center ).applyMatrix4( invMat );
+            const resX = geometry.boundsTree.raycastFirst( rayX, THREE.DoubleSide );
+
+            rayY.origin.copy( center ).applyMatrix4( invMat );
+            const resY = geometry.boundsTree.raycastFirst( rayY, THREE.DoubleSide );
+
+            rayZ.origin.copy( center ).applyMatrix4( invMat );
+            const resZ = geometry.boundsTree.raycastFirst( rayZ, THREE.DoubleSide );
+
+            if (
+                resX && resX.face.normal.dot( rayX.direction ) > 0 &&
+                resY && resY.face.normal.dot( rayY.direction ) > 0 &&
+                resZ && resZ.face.normal.dot( rayZ.direction ) > 0
+
+            ) {
+                return true;
+            }
+        }
+
+        return false;
+>>>>>>> anhnt/detect-rebar
     }
 
     public renderVoxelModel(isShow: boolean = true) {
@@ -176,4 +222,48 @@ export class ModelHandler {
         })
     }
 
+    public detectRebarAndVoxel() {
+        this._modelLoader?.getScene()?.get().updateMatrixWorld()
+        const rebarElement = this._modelLoader.getElement().reinforcingBarList;
+        this._modelLoader.getElement().voxelModelData.forEach((voxel: VoxelModelData) => {
+            voxel.reBarList = []
+            const firstMesh = voxel.mesh.children[1] as THREE.Mesh
+            firstMesh.updateMatrixWorld()
+            let count = 0;
+            rebarElement.map((rebar: FragmentMesh) => {
+                const sphere = rebar.boundingSphere;
+                if (!sphere) return
+
+                const box = new THREE.Box3()
+                box.min.setScalar( -voxel.boxSize ).add( voxel.center );
+                box.max.setScalar( voxel.boxSize ).add( voxel.center );
+
+                const geometry = rebar.convertGeometry;
+                const value = this.shapeCast(rebar, geometry, box);
+
+                if (value) {
+                    voxel.reBarList.push(rebar)
+                    count++;
+                }
+            })
+
+            console.log('count voxel collision with rebar', count)
+            if (count > 0 && count <= 2) {
+                firstMesh.material.color.set('#00ffec')
+            } else if (count > 2 && count <= 4) {
+                firstMesh.material.color.set('#0228ac')
+            }
+            else if (count > 4 && count <= 6) {
+                firstMesh.material.color.set('#afb300')
+            }
+            else if (count > 6) {
+                firstMesh.material.color.set('#c70000')
+            }
+        });
+    }
+
+    private shapeCast(targetMesh: FragmentMesh, geometry: BufferGeometry, box: THREE.Box3) {
+        const invMat = new THREE.Matrix4().copy(targetMesh.matrixWorld).invert();
+        return geometry.boundsTree.intersectsBox( box, invMat );
+    }
 }

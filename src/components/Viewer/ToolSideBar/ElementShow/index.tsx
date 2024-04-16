@@ -121,7 +121,7 @@ const ElementShow = ({ setIsVoxelChecked }: ElementShowProps) => {
                 break
             }
         }
-    }, [modelLoader])
+    }, [modelLoader, setIsSetting])
 
     return (
         <>
