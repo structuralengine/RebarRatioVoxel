@@ -209,7 +209,6 @@ export class ModelHandler {
         }
 
         return false;
->>>>>>> anhnt/detect-rebar
     }
 
     public renderVoxelModel(isShow: boolean = true) {
