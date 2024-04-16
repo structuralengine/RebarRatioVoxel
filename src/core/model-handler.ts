@@ -85,7 +85,7 @@ export class ModelHandler {
         const boxSize = this._modelLoader.settings.boxSize;
         const boxRoundness = this._modelLoader.settings.boxRoundness;
         const maxDistance = Math.sqrt(3) * gridSize / 2;
-        console.log('rays', rays)
+
         modelElement.voxelModelData = [];
 
         for (let x = boundingBoxOfConcrete.min.x; x <= boundingBoxOfConcrete.max.x; x += gridSize) {
@@ -221,48 +221,48 @@ export class ModelHandler {
         })
     }
 
-    public detectRebarAndVoxel() {
-        this._modelLoader?.getScene()?.get().updateMatrixWorld()
-        const rebarElement = this._modelLoader.getElement().reinforcingBarList;
-        this._modelLoader.getElement().voxelModelData.forEach((voxel: VoxelModelData) => {
-            voxel.reBarList = []
-            const firstMesh = voxel.mesh.children[1] as THREE.Mesh
-            firstMesh.updateMatrixWorld()
-            let count = 0;
-            rebarElement.map((rebar: FragmentMesh) => {
-                const sphere = rebar.boundingSphere;
-                if (!sphere) return
+    // public detectRebarAndVoxel() {
+    //     this._modelLoader?.getScene()?.get().updateMatrixWorld()
+    //     const rebarElement = this._modelLoader.getElement().reinforcingBarList;
+    //     this._modelLoader.getElement().voxelModelData.forEach((voxel: VoxelModelData) => {
+    //         voxel.reBarList = []
+    //         const firstMesh = voxel.mesh.children[1] as THREE.Mesh
+    //         firstMesh.updateMatrixWorld()
+    //         let count = 0;
+    //         rebarElement.map((rebar: FragmentMesh) => {
+    //             const sphere = rebar.boundingSphere;
+    //             if (!sphere) return
 
-                const box = new THREE.Box3()
-                box.min.setScalar( -voxel.boxSize ).add( voxel.center );
-                box.max.setScalar( voxel.boxSize ).add( voxel.center );
+    //             const box = new THREE.Box3()
+    //             box.min.setScalar( -voxel.boxSize ).add( voxel.center );
+    //             box.max.setScalar( voxel.boxSize ).add( voxel.center );
 
-                const geometry = rebar.convertGeometry;
-                const value = this.shapeCast(rebar, geometry, box);
+    //             const geometry = rebar.convertGeometry;
+    //             const value = this.shapeCast(rebar, geometry, box);
 
-                if (value) {
-                    voxel.reBarList.push(rebar)
-                    count++;
-                }
-            })
+    //             if (value) {
+    //                 voxel.reBarList.push(rebar)
+    //                 count++;
+    //             }
+    //         })
 
-            console.log('count voxel collision with rebar', count)
-            if (count > 0 && count <= 2) {
-                firstMesh.material.color.set('#00ffec')
-            } else if (count > 2 && count <= 4) {
-                firstMesh.material.color.set('#0228ac')
-            }
-            else if (count > 4 && count <= 6) {
-                firstMesh.material.color.set('#afb300')
-            }
-            else if (count > 6) {
-                firstMesh.material.color.set('#c70000')
-            }
-        });
-    }
+    //         console.log('count voxel collision with rebar', count)
+    //         if (count > 0 && count <= 2) {
+    //             firstMesh.material.color.set('#00ffec')
+    //         } else if (count > 2 && count <= 4) {
+    //             firstMesh.material.color.set('#0228ac')
+    //         }
+    //         else if (count > 4 && count <= 6) {
+    //             firstMesh.material.color.set('#afb300')
+    //         }
+    //         else if (count > 6) {
+    //             firstMesh.material.color.set('#c70000')
+    //         }
+    //     });
+    // }
 
-    private shapeCast(targetMesh: FragmentMesh, geometry: BufferGeometry, box: THREE.Box3) {
-        const invMat = new THREE.Matrix4().copy(targetMesh.matrixWorld).invert();
-        return geometry.boundsTree.intersectsBox( box, invMat );
-    }
+    // private shapeCast(targetMesh: FragmentMesh, geometry: BufferGeometry, box: THREE.Box3) {
+    //     const invMat = new THREE.Matrix4().copy(targetMesh.matrixWorld).invert();
+    //     return geometry.boundsTree.intersectsBox( box, invMat );
+    // }
 }

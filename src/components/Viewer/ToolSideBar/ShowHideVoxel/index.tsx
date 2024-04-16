@@ -40,7 +40,7 @@ const items: ItemElementType[] = [
 const ShowHideVoxelElement = () => {
     const [menuItem, setMenuItem] = useState<ItemElementType[]>(items)
 
-    const { loaded, modelLoader } = useContext(ViewerContext)
+    const { loaded, modelLoader, isSetting, setIsSetting} = useContext(ViewerContext)
 
     useEffect(() => {
         if (loaded) {
@@ -56,6 +56,14 @@ const ShowHideVoxelElement = () => {
             setMenuItem(menuItem)
         }
     }, [loaded]);
+
+    useEffect(() => {
+        if (isSetting) {
+            const changeMenuItem = menuItem.map((item: ItemElementType) => ({ ...item, isShow: true }));
+            setMenuItem(changeMenuItem);
+            setIsSetting(false)
+        }
+    }, [isSetting]);
 
     const handleOnChangeShow = useCallback(async (id: string, status: boolean) => {
         const menus = menuItem.map((item: ItemElementType) => {

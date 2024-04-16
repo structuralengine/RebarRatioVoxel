@@ -232,7 +232,7 @@ export class ModelLoader extends CommonLoader {
 
     public showVoxelModel() {
         this._handle.renderVoxelModel()
-        this._handle.detectRebarAndVoxel();
+        // this._handle.detectRebarAndVoxel();
     }
 
     public hideVoxelModel() {
