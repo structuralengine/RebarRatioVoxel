@@ -12,21 +12,24 @@ export class VoxelModelData {
     public center: THREE.Vector3
     public boxSize: number
     public boxRoundness: number
+    public transparent: number
     public mesh: THREE.Object3D
     public reBarList: FragmentMesh[]
 
-    constructor(center: THREE.Vector3, boxSize: number, boxRoundness: number = 0) {
+    constructor(center: THREE.Vector3, boxSize: number, boxRoundness: number = 0, transparent: number) {
         this.center = center;
         this.boxSize = boxSize;
         this.boxRoundness = boxRoundness;
-        this.mesh = this.createVoxelMesh(center, boxSize, boxRoundness);
+        this.transparent = transparent
+        this.mesh = this.createVoxelMesh(center, boxSize, boxRoundness, transparent);
         this.id = this.mesh.uuid;
         this.reBarList = [];
     }
 
-    private createVoxelMesh(pointCenter: THREE.Vector3, boxSize: number, boxRoundness: number = 0): THREE.Object3D {
-        // const geometry = new BoxGeometry(boxSize, boxSize, boxSize)
-        const geometry = new RoundedBoxGeometry(boxSize, boxSize, boxSize, 1, boxRoundness)
+    private createVoxelMesh(pointCenter: THREE.Vector3, boxSize: number, boxRoundness: number = 0, transparent: number): THREE.Object3D {
+        const geometry = new RoundedBoxGeometry(boxSize, boxSize, boxSize, 0.1, boxRoundness)
+        const voxelEdgeMaterial = new THREE.LineBasicMaterial({ color: '#3c3c3c', opacity: transparent });
+        const voxelMaterial = new THREE.MeshBasicMaterial({ color: '#057400', opacity: transparent, transparent: true });
 
         const edges = new THREE.EdgesGeometry(geometry);
         const line = new THREE.LineSegments(edges, voxelEdgeMaterial.clone());

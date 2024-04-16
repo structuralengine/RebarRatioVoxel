@@ -9,6 +9,8 @@ import { ModelElement } from "./model-element.ts";
 import {MeshBVH, MeshBVHHelper} from "three-mesh-bvh";
 import {BufferGeometry} from "three";
 
+import { ModelElement, VoxelModelData } from "./model-element.ts";
+import { add } from 'three/examples/jsm/libs/tween.module.js';
 export const defaultVolume = 300;
 export const defaultGridSize = 0.5;
 
@@ -16,12 +18,14 @@ export class ModelSetting {
     public gridSize: number;
     public boxSize: number;
     public boxRoundness: number;
+    public transparent: number;
     public minSizeLimit: number;
 
     constructor() {
         this.gridSize = defaultGridSize;
         this.boxSize = defaultGridSize;
         this.boxRoundness = 0.01;
+        this.transparent = 0.4
         this.minSizeLimit = defaultGridSize;
     }
 
@@ -36,6 +40,11 @@ export class ModelSetting {
         this.gridSize = setting.gridSize
         this.boxSize = setting.boxSize
         this.boxRoundness = setting.boxRoundness
+        this.transparent = setting.transparent
+
+        return {
+            isSuccess: true
+        }
     }
 
     private calculateScale(volume: number) {
@@ -103,8 +112,8 @@ export class ModelLoader extends CommonLoader {
         return this.settings;
     }
 
-    public reSetupLoadModel() {
-        this._handle.reSetupVoxel()
+    public async reSetupLoadModel() {
+        await this._handle.reSetupVoxel()
     }
 
     public async cleanUp() {
@@ -394,6 +403,28 @@ export class ModelLoader extends CommonLoader {
                     break
                 }
             }
+        }
+    }
+
+    public showVoxelByColor(type: number) {
+        const scene = this.getScene()?.get();
+        const modelElement = this.getElement();
+        if (scene && modelElement) {
+            const filteredVoxels = modelElement.voxelModelData.filter(voxel => voxel.mesh.children[1].material.color.getHex() === type);
+            filteredVoxels.forEach(voxel => {
+                scene.add(voxel.mesh);
+            });
+        }
+    }
+
+    public hideVoxelByColor(type: number) {
+        const scene = this.getScene()?.get();
+        const modelElement = this.getElement();
+        if (scene && modelElement) {
+            const filteredVoxels = modelElement.voxelModelData.filter(voxel => voxel.mesh.children[1].material.color.getHex() === type);
+            filteredVoxels.forEach(voxel => {
+                scene.remove(voxel.mesh);
+            });
         }
     }
 }

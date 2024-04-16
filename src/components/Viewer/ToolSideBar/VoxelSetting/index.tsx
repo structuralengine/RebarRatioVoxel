@@ -1,27 +1,31 @@
-import { useContext, useEffect, useMemo, useState } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { ViewerContext } from "../../../../contexts";
 
-type DataProps = {
+export type DataSettingsProps = {
     gridSize: number,
     boxSize: number,
     boxRoundness: number,
+    transparent: number,
 }
 
 const VoxelSetting = () => {
-    const { modelLoader, setIsSetting } = useContext(ViewerContext)
-    const [data, setData] = useState<DataProps>({
+    const { modelLoader, setLoaded } = useContext(ViewerContext)
+    const [data, setData] = useState<DataSettingsProps>({
         gridSize: 0,
         boxSize: 0,
         boxRoundness: 0,
+        transparent: 0
     })
     const [minGrid, setMinGrid] = useState<number>(0.1)
 
     useEffect(() => {
         if (modelLoader) {
+            setLoaded(true)
             setData({
                 gridSize: modelLoader?.getSetting().gridSize,
                 boxSize: modelLoader?.getSetting().boxSize,
                 boxRoundness: modelLoader?.getSetting().boxRoundness,
+                transparent: modelLoader?.getSetting().transparent,
             })
             setMinGrid(modelLoader?.getSetting().minSizeLimit)
         }
@@ -51,7 +55,15 @@ const VoxelSetting = () => {
             value: data.boxRoundness,
             min: 0,
             max: 0.1,
-        }
+        },
+        {
+            id: 'transparent',
+            name: 'Transparent',
+            step: 0.1,
+            value: data.transparent,
+            min: 0.1,
+            max: 1,
+        },
     ], [data, modelLoader])
 
     const handleChangeSetting = (value: string, type: string) => {
@@ -77,11 +89,12 @@ const VoxelSetting = () => {
 
     }
 
-    const handleApplySetting = () => {
+    const handleApplySetting = useCallback(async () => {
+        setLoaded(false)
         modelLoader?.settings.setupSetting(data)
-        modelLoader?.reSetupLoadModel()
-        setIsSetting(true)
-    }
+        await modelLoader?.reSetupLoadModel()
+        setLoaded(true)
+    }, [data])
 
     return (
         <>
@@ -97,7 +110,7 @@ const VoxelSetting = () => {
                     </div>
                 )}
                 <div className='button-setting'>
-                    <button className='button'onClick={() => handleApplySetting()}>Apply</button>
+                    <button className='button' onClick={() => handleApplySetting()}>Apply</button>
                 </div>
             </div>
         </>

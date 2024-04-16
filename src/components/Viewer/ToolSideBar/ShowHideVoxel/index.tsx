@@ -1,7 +1,8 @@
 import { useCallback, useContext, useEffect, useState } from "react";
-import ItemElementShow, { ItemElementType } from "./ItemElementShow.tsx";
+import ShowHideVoxel from "./ShowHideVoxel";
+import { ItemElementType } from "./ShowHideVoxel";
+
 import { ViewerContext } from "../../../../contexts";
-import { IFCBUILDINGELEMENTPROXY, IFCREINFORCINGBAR } from "web-ifc";
 
 const items: ItemElementType[] = [
     {
@@ -10,23 +11,33 @@ const items: ItemElementType[] = [
         isShow: false
     },
     {
-        id: 'voxel',
-        name: 'Voxel',
+        id: 'color 0',
+        name: '0x00d4ff',
         isShow: false
     },
     {
-        id: 'concrete',
-        name: 'Concrete',
+        id: 'color 1',
+        name: '0x09e8cd',
         isShow: false
     },
     {
-        id: 'reinforcingBar',
-        name: 'Reinforcing Bar',
+        id: 'color 2',
+        name: '0x09e810',
+        isShow: false
+    },
+    {
+        id: 'color 3',
+        name: '0xe8de09',
+        isShow: false
+    },
+    {
+        id: 'color 4',
+        name: '0xe80909',
         isShow: false
     }
 ]
 
-const ElementShow = () => {
+const ShowHideVoxelElement = () => {
     const [menuItem, setMenuItem] = useState<ItemElementType[]>(items)
 
     const { loaded, modelLoader } = useContext(ViewerContext)
@@ -70,16 +81,24 @@ const ElementShow = () => {
 
     const handleShowModel = useCallback(async (id: string) => {
         switch (id) {
-            case 'concrete': {
-                modelLoader?.showModel(IFCBUILDINGELEMENTPROXY)
+            case 'color 0': {
+                modelLoader?.showVoxelByColor(0x00d4ff)
                 break
             }
-            case 'reinforcingBar': {
-                modelLoader?.showModel(IFCREINFORCINGBAR)
+            case 'color 1': {
+                modelLoader?.showVoxelByColor(0x09e8cd)
                 break
             }
-            case 'voxel': {
-                modelLoader?.showVoxelModel()
+            case 'color 2': {
+                modelLoader?.showVoxelByColor(0x09e810)
+                break
+            }
+            case 'color 3': {
+                modelLoader?.showVoxelByColor(0xe8de09)
+                break
+            }
+            case 'color 4': {
+                modelLoader?.showVoxelByColor(0xe80909)
                 break
             }
         }
@@ -87,38 +106,37 @@ const ElementShow = () => {
 
     const handleRemoveModel = useCallback(async (id: string) => {
         switch (id) {
-            case 'concrete': {
-                modelLoader?.removeModel(IFCBUILDINGELEMENTPROXY)
+            case 'color 0': {
+                modelLoader?.hideVoxelByColor(0x00d4ff)
                 break
             }
-            case 'reinforcingBar': {
-                modelLoader?.removeModel(IFCREINFORCINGBAR)
+            case 'color 1': {
+                modelLoader?.hideVoxelByColor(0x09e8cd)
                 break
             }
-            case 'voxel': {
-                modelLoader?.hideVoxelModel()
+            case 'color 2': {
+                modelLoader?.hideVoxelByColor(0x09e810)
+                break
+            }
+            case 'color 3': {
+                modelLoader?.hideVoxelByColor(0xe8de09)
+                break
+            }
+            case 'color 4': {
+                modelLoader?.hideVoxelByColor(0xe80909)
                 break
             }
         }
-    }, [modelLoader, setIsSetting])
+    }, [modelLoader])
 
     return (
         <>
-            <div className='header'>Element show</div>
-            <div className='body'>
-                <div className='element-show-container'>
-                    {menuItem.map((item: ItemElementType) =>
-                        <ItemElementShow key={item.id} id={item.id} name={item.name} isShow={item.isShow}
-                            onChange={handleOnChangeShow}
-                            onShow={handleShowModel}
-                            onRemove={handleRemoveModel}
-                        />
-                    )}
-                </div>
-            </div>
+        <div className='header'>Show/Hide Voxel by Color</div>
+           <div className='body'>
+            {menuItem.map((item: ItemElementType) => <ShowHideVoxel key={item.id} id={item.id} name={item.name} isShow={item.isShow} onChange={handleOnChangeShow} onShow={handleShowModel} onRemove={handleRemoveModel} />)}
+        </div>
         </>
-
     );
 };
 
-export default ElementShow;
+export default ShowHideVoxelElement;

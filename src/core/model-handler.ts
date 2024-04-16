@@ -33,6 +33,12 @@ const rays = [
     new THREE.Vector3(-1, -1, -1) // Bottom-Left-Back
 ];
 
+const materialColorlist = [
+    { color: 0x09e8cd, label: 'Color 1' },
+    { color: 0x09e810, label: 'Color 2' },
+    { color: 0xe8de09, label: 'Color 3' },
+    { color: 0xe80909, label: 'Color 4' }
+]
 export class ModelHandler {
     private _modelLoader: ModelLoader
 
@@ -44,11 +50,11 @@ export class ModelHandler {
 
     }
 
-    public reSetupVoxel() {
+    public async reSetupVoxel() {
         this._modelLoader.getElement().voxelModelData.forEach((voxel: VoxelModelData) => {
             this._modelLoader.getScene()?.get().remove(voxel.mesh)
         })
-        this.voxelizeModel()
+        await this.voxelizeModel()
         this._modelLoader.getElement().voxelModelData.forEach((voxel: VoxelModelData) => {
             this._modelLoader.getScene()?.get().add(voxel.mesh)
         })
@@ -82,6 +88,7 @@ export class ModelHandler {
         // const boxSize = 0.18;
 
         const boxRoundness = this._modelLoader.settings.boxRoundness;
+        const transparent = this._modelLoader.settings.transparent
         const maxDistance = Math.sqrt(3) * gridSize / 2;
         console.log('rays', rays)
         modelElement.voxelModelData = [];
@@ -148,6 +155,66 @@ export class ModelHandler {
         const timestampEnd = new Date().getTime();
         console.log(`Success took ${timestampEnd - timestampStart} ms`, modelElement.voxelModelData);
 
+    }
+
+    private fillColorRebar(reinforcingBarInVoxel: any, color: number){
+        for (let item of reinforcingBarInVoxel) {
+            const itemMesh = (item as THREE.Mesh).material
+            console.log(itemMesh)
+            itemMesh.color.setHex(color);
+            // (item as THREE.Mesh).material.color.set(color);
+        }
+        // console.log(reinforcingBarInVoxel[0].object);
+        // (reinforcingBarInVoxel[0] as THREE.Mesh).material.color.set(color);
+    }
+
+    private geAllCollidingObjects(fromMeshes: FragmentMesh[], mesh: THREE.Object3D, newVoxel: VoxelModelData) {
+        const boundary = new THREE.Box3().setFromObject(mesh);
+        const collidingObjs:THREE.Object3D[]=[];
+        fromMeshes.forEach((meshNow:THREE.Object3D)=>
+        {
+            const otherBounds = new THREE.Box3().setFromObject(meshNow);
+            if(boundary.intersectsBox(otherBounds))
+            {
+                collidingObjs.push(meshNow)
+            }
+        });
+
+        const l = collidingObjs.length;
+        const hoverMesh = newVoxel.mesh.children[1] as THREE.Mesh
+        let color = 0x00d4ff;
+        for (const colorItem of materialColorlist) {
+            if (l > 0 && l < 2 && colorItem.label === 'Color 1') {
+                color = colorItem.color;
+            } else if (l >= 2 && l < 5 && colorItem.label === 'Color 2') {
+                color = colorItem.color;
+            } else if (l >= 5 && l < 8 && colorItem.label === 'Color 3') {
+                color = colorItem.color;
+            } else if (l >= 8 && colorItem.label === 'Color 4') {
+                color = colorItem.color;
+            }
+        }
+        hoverMesh.material.color.set(color);
+
+
+        let color1 = 0x00d4ff;
+            if (l > 0 && l < 2) {
+                color1 = materialColorlist[0].color;
+            } else if (l >= 2 && l < 5) {
+                color1 = materialColorlist[1].color;
+            } else if (l >= 5 && l < 8 ) {
+                color1 = materialColorlist[2].color;
+            } else if (l >= 8) {
+                color1 = materialColorlist[3].color;
+            }
+            for (let item of collidingObjs) {
+                const itemMesh = (item as THREE.Mesh).material.clone();
+                itemMesh.color.setHex(color1);
+
+                item.material = itemMesh;
+                item.material.needsUpdate = true;
+            }
+        // return collidingObjs;
     }
 
     private checkCollision(point: THREE.Vector3, mesh: FragmentMesh, maxDistance: number) {
@@ -269,5 +336,6 @@ export class ModelHandler {
         box.max.set( voxel.boxSize/2,voxel.boxSize/2,voxel.boxSize/2 );
         return geometry.boundsTree.intersectsBox( box, transformMatrix );
     }
+
 
 }
