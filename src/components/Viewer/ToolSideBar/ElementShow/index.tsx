@@ -85,7 +85,6 @@ const ElementShow = ({ setIsVoxelChecked }: ElementShowProps) => {
             }
             case 'voxel': {
                 modelLoader?.showVoxelModel()
-                setIsVoxelChecked(true)
                 break
             }
         }
@@ -106,7 +105,7 @@ const ElementShow = ({ setIsVoxelChecked }: ElementShowProps) => {
                 break
             }
         }
-    }, [modelLoader, setIsSetting])
+    }, [modelLoader])
 
     return (
         <>

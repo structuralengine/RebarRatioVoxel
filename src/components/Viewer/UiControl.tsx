@@ -9,7 +9,6 @@ type ToolSideBarProps = {
 }
 
 const UiControl = ({isShow}: ToolSideBarProps) => {
-const [isVoxelChecked, setIsVoxelChecked] = useState<boolean>(false);
 
     if (!isShow) return null
     return (

@@ -111,7 +111,7 @@ export class ModelHandler {
                         const mesh = concreteList[c];
                         const geometry = mesh.convertGeometry;
                         if (this.checkCollisionByBVH(centerPoint, box, mesh, geometry)) {
-                            modelElement.voxelModelData.push(new VoxelModelData(centerPoint, boxSize, boxRoundness));
+                            modelElement.voxelModelData.push(new VoxelModelData(centerPoint, boxSize, boxRoundness, transparent));
                             break;
                         }
                     }
@@ -149,85 +149,6 @@ export class ModelHandler {
         const timestampEnd = new Date().getTime();
         console.log(`Success took ${timestampEnd - timestampStart} ms`, modelElement.voxelModelData);
 
-    }
-
-    private fillColorRebar(reinforcingBarInVoxel: any, color: number){
-        for (let item of reinforcingBarInVoxel) {
-            const itemMesh = (item as THREE.Mesh).material
-            console.log(itemMesh)
-            itemMesh.color.setHex(color);
-            // (item as THREE.Mesh).material.color.set(color);
-        }
-        // console.log(reinforcingBarInVoxel[0].object);
-        // (reinforcingBarInVoxel[0] as THREE.Mesh).material.color.set(color);
-    }
-
-    private geAllCollidingObjects(fromMeshes: FragmentMesh[], mesh: THREE.Object3D, newVoxel: VoxelModelData) {
-        const boundary = new THREE.Box3().setFromObject(mesh);
-        const collidingObjs:THREE.Object3D[]=[];
-        fromMeshes.forEach((meshNow:THREE.Object3D)=>
-        {
-            const otherBounds = new THREE.Box3().setFromObject(meshNow);
-            if(boundary.intersectsBox(otherBounds))
-            {
-                collidingObjs.push(meshNow)
-            }
-        });
-
-        const l = collidingObjs.length;
-        const hoverMesh = newVoxel.mesh.children[1] as THREE.Mesh
-        let color = 0x00d4ff;
-        for (const colorItem of materialColorlist) {
-            if (l > 0 && l < 2 && colorItem.label === 'Color 1') {
-                color = colorItem.color;
-            } else if (l >= 2 && l < 5 && colorItem.label === 'Color 2') {
-                color = colorItem.color;
-            } else if (l >= 5 && l < 8 && colorItem.label === 'Color 3') {
-                color = colorItem.color;
-            } else if (l >= 8 && colorItem.label === 'Color 4') {
-                color = colorItem.color;
-            }
-        }
-        hoverMesh.material.color.set(color);
-
-
-        let color1 = 0x00d4ff;
-            if (l > 0 && l < 2) {
-                color1 = materialColorlist[0].color;
-            } else if (l >= 2 && l < 5) {
-                color1 = materialColorlist[1].color;
-            } else if (l >= 5 && l < 8 ) {
-                color1 = materialColorlist[2].color;
-            } else if (l >= 8) {
-                color1 = materialColorlist[3].color;
-            }
-            for (let item of collidingObjs) {
-                const itemMesh = (item as THREE.Mesh).material.clone();
-                itemMesh.color.setHex(color1);
-
-                item.material = itemMesh;
-                item.material.needsUpdate = true;
-            }
-        // return collidingObjs;
-    }
-
-    private checkCollision(point: THREE.Vector3, mesh: FragmentMesh, maxDistance: number) {
-        const raycaster = this._modelLoader.getRaycaster()?.get();
-        if (!raycaster) return false;
-
-        for (const rayDirection of rays) {
-            raycaster.set(point, rayDirection);
-            const intersects = raycaster.intersectObject(mesh);
-            if (intersects.length > 0) {
-                for (let intersect of intersects) {
-                    if (intersect.distance <= maxDistance) {
-                        return true;
-                    }
-                }
-            }
-        }
-
-        return false;
     }
 
     private checkCollisionByBVH(center: THREE.Vector3, box: THREE.Box3, model: FragmentMesh, geometry: BufferGeometry) {

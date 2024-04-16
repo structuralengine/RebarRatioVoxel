@@ -12,27 +12,27 @@ const items: ItemElementType[] = [
     },
     {
         id: 'color 0',
-        name: 'Blue',
+        name: '0x057400',
         isShow: false
     },
     {
         id: 'color 1',
-        name: 'Aqua',
+        name: '0x00ffec',
         isShow: false
     },
     {
         id: 'color 2',
-        name: 'Green',
+        name: '0x0228ac',
         isShow: false
     },
     {
         id: 'color 3',
-        name: 'Yellow',
+        name: '0xafb300',
         isShow: false
     },
     {
         id: 'color 4',
-        name: 'Red',
+        name: '0xc70000',
         isShow: false
     }
 ]
@@ -56,14 +56,6 @@ const ShowHideVoxelElement = () => {
             setMenuItem(menuItem)
         }
     }, [loaded]);
-
-    useEffect(() => {
-        if (isSetting) {
-            const changeMenuItem = menuItem.map((item: ItemElementType) => ({ ...item, isShow: true }));
-            setMenuItem(changeMenuItem);
-            setIsSetting(false)
-        }
-    }, [isSetting]);
 
     const handleOnChangeShow = useCallback(async (id: string, status: boolean) => {
         const menus = menuItem.map((item: ItemElementType) => {
@@ -90,23 +82,23 @@ const ShowHideVoxelElement = () => {
     const handleShowModel = useCallback(async (id: string) => {
         switch (id) {
             case 'color 0': {
-                modelLoader?.showVoxelByColor(0x00d4ff)
+                modelLoader?.showVoxelByColor(0x057400)
                 break
             }
             case 'color 1': {
-                modelLoader?.showVoxelByColor(0x09e8cd)
+                modelLoader?.showVoxelByColor(0x00ffec)
                 break
             }
             case 'color 2': {
-                modelLoader?.showVoxelByColor(0x09e810)
+                modelLoader?.showVoxelByColor(0x0228ac)
                 break
             }
             case 'color 3': {
-                modelLoader?.showVoxelByColor(0xe8de09)
+                modelLoader?.showVoxelByColor(0xafb300)
                 break
             }
             case 'color 4': {
-                modelLoader?.showVoxelByColor(0xe80909)
+                modelLoader?.showVoxelByColor(0xc70000)
                 break
             }
         }
@@ -115,23 +107,23 @@ const ShowHideVoxelElement = () => {
     const handleRemoveModel = useCallback(async (id: string) => {
         switch (id) {
             case 'color 0': {
-                modelLoader?.hideVoxelByColor(0x00d4ff)
+                modelLoader?.hideVoxelByColor(0x057400)
                 break
             }
             case 'color 1': {
-                modelLoader?.hideVoxelByColor(0x09e8cd)
+                modelLoader?.hideVoxelByColor(0x00ffec)
                 break
             }
             case 'color 2': {
-                modelLoader?.hideVoxelByColor(0x09e810)
+                modelLoader?.hideVoxelByColor(0x0228ac)
                 break
             }
             case 'color 3': {
-                modelLoader?.hideVoxelByColor(0xe8de09)
+                modelLoader?.hideVoxelByColor(0xafb300)
                 break
             }
             case 'color 4': {
-                modelLoader?.hideVoxelByColor(0xe80909)
+                modelLoader?.hideVoxelByColor(0xc70000)
                 break
             }
         }
