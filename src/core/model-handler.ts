@@ -86,24 +86,31 @@ export class ModelHandler {
         console.log('rays', rays)
         modelElement.voxelModelData = [];
 
-        for (let x = boundingBoxOfConcrete.min.x; x <= boundingBoxOfConcrete.max.x; x += gridSize) {
-            for (let y = boundingBoxOfConcrete.min.y; y <= boundingBoxOfConcrete.max.y; y += gridSize) {
-                for (let z = boundingBoxOfConcrete.min.z; z <= boundingBoxOfConcrete.max.z; z += gridSize) {
-                    const centerPoint = new THREE.Vector3(x + gridSize / 2, y + gridSize / 2, z + gridSize / 2);
+        const resolution = this._modelLoader.settings.gridSize;
+
+        const minX = boundingBoxOfConcrete.min.x
+        const minY = boundingBoxOfConcrete.min.y
+        const minZ = boundingBoxOfConcrete.min.z
+
+        const maxX = 1 + ((boundingBoxOfConcrete.max.x - minX) / gridSize)
+        const maxY = 1 + ((boundingBoxOfConcrete.max.y - minY) / gridSize)
+        const maxZ = 1 + ((boundingBoxOfConcrete.max.z - minZ) / gridSize)
+
+        for (let i = 0; i < maxX; i++) {
+            for (let j = 0; j < maxY; j++) {
+                for (let k = 0; k < maxZ; k++) {
+                    const x = minX + gridSize * i;
+                    const y = minY + gridSize * j;
+                    const z = minZ + gridSize * k;
+                    const centerPoint = new THREE.Vector3(x, y, z);
 
                     const box = new THREE.Box3()
-                    box.min.setScalar( -gridSize ).add( centerPoint );
-                    box.max.setScalar( gridSize ).add( centerPoint );
+                    box.min.setScalar( -gridSize/2 ).add( centerPoint );
+                    box.max.setScalar( gridSize/2 ).add( centerPoint );
 
-                    for (let i = 0; i < concreteList.length; i++) {
-                        const mesh = concreteList[i];
+                    for (let c = 0; c < concreteList.length; c++) {
+                        const mesh = concreteList[c];
                         const geometry = mesh.convertGeometry;
-
-                        // if (this.checkCollision(centerPoint, mesh, maxDistance)) {
-                        //     modelElement.voxelModelData.push(new VoxelModelData(centerPoint, boxSize, boxRoundness));
-                        //     break;
-                        // }
-
                         if (this.checkCollisionByBVH(centerPoint, box, mesh, geometry)) {
                             modelElement.voxelModelData.push(new VoxelModelData(centerPoint, boxSize, boxRoundness));
                             break;
@@ -112,6 +119,33 @@ export class ModelHandler {
                 }
             }
         }
+
+        // for (let x = boundingBoxOfConcrete.min.x; x <= boundingBoxOfConcrete.max.x; x += gridSize) {
+        //     for (let y = boundingBoxOfConcrete.min.y; y <= boundingBoxOfConcrete.max.y; y += gridSize) {
+        //         for (let z = boundingBoxOfConcrete.min.z; z <= boundingBoxOfConcrete.max.z; z += gridSize) {
+        //             const centerPoint = new THREE.Vector3(x + gridSize / 2, y + gridSize / 2, z + gridSize / 2);
+        //
+        //             const box = new THREE.Box3()
+        //             box.min.setScalar( -gridSize ).add( centerPoint );
+        //             box.max.setScalar( gridSize ).add( centerPoint );
+        //
+        //             for (let i = 0; i < concreteList.length; i++) {
+        //                 const mesh = concreteList[i];
+        //                 const geometry = mesh.convertGeometry;
+        //
+        //                 // if (this.checkCollision(centerPoint, mesh, maxDistance)) {
+        //                 //     modelElement.voxelModelData.push(new VoxelModelData(centerPoint, boxSize, boxRoundness));
+        //                 //     break;
+        //                 // }
+        //
+        //                 if (this.checkCollisionByBVH(centerPoint, box, mesh, geometry)) {
+        //                     modelElement.voxelModelData.push(new VoxelModelData(centerPoint, boxSize, boxRoundness));
+        //                     break;
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
 
         const timestampEnd = new Date().getTime();
         console.log(`Success took ${timestampEnd - timestampStart} ms`, modelElement.voxelModelData);
@@ -164,8 +198,8 @@ export class ModelHandler {
             const resZ = geometry.boundsTree.raycastFirst( rayZ, THREE.DoubleSide );
 
             if (
-                resX && resX.face.normal.dot( rayX.direction ) > 0 &&
-                resY && resY.face.normal.dot( rayY.direction ) > 0 &&
+                resX && resX.face.normal.dot( rayX.direction ) > 0 ||
+                resY && resY.face.normal.dot( rayY.direction ) > 0 ||
                 resZ && resZ.face.normal.dot( rayZ.direction ) > 0
 
             ) {
