@@ -5,7 +5,7 @@ import { Fragment, FragmentMesh } from "bim-fragment";
 import { CommonLoader } from "./common-loader.ts";
 import { ModelHandler } from "./model-handler.ts";
 import { IFCBUILDINGELEMENTPROXY, IFCREINFORCINGBAR } from "web-ifc";
-import {ModelElement, VoxelModelData} from "./model-element.ts";
+import { ModelElement, VoxelModelData } from "./model-element.ts";
 import { add } from 'three/examples/jsm/libs/tween.module.js';
 export const defaultVolume = 300;
 export const defaultGridSize = 0.5;
@@ -14,12 +14,14 @@ export class ModelSetting {
     public gridSize: number;
     public boxSize: number;
     public boxRoundness: number;
+    public transparent: number;
     public minSizeLimit: number;
 
     constructor() {
         this.gridSize = defaultGridSize;
         this.boxSize = defaultGridSize;
         this.boxRoundness = 0.01;
+        this.transparent = 0.4
         this.minSizeLimit = defaultGridSize;
     }
 
@@ -34,6 +36,11 @@ export class ModelSetting {
         this.gridSize = setting.gridSize
         this.boxSize = setting.boxSize
         this.boxRoundness = setting.boxRoundness
+        this.transparent = setting.transparent
+
+        return {
+            isSuccess: true
+        }
     }
 
     private calculateScale(volume: number) {
@@ -95,8 +102,8 @@ export class ModelLoader extends CommonLoader {
         return this.settings;
     }
 
-    public reSetupLoadModel() {
-        this._handle.reSetupVoxel()
+    public async reSetupLoadModel() {
+        await this._handle.reSetupVoxel()
     }
 
     public async cleanUp() {
@@ -228,7 +235,7 @@ export class ModelLoader extends CommonLoader {
     public hideVoxelModel() {
         this._handle.renderVoxelModel(false)
     }
-    
+
     public async filterReinforcingBar() {
         if (this._groupModel) {
             const proProxies = await this._groupModel?.getAllPropertiesOfType(IFCBUILDINGELEMENTPROXY)

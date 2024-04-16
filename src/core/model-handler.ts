@@ -48,11 +48,11 @@ export class ModelHandler {
 
     }
 
-    public reSetupVoxel() {
+    public async reSetupVoxel() {
         this._modelLoader.getElement().voxelModelData.forEach((voxel: VoxelModelData) => {
             this._modelLoader.getScene()?.get().remove(voxel.mesh)
         })
-        this.voxelizeModel()
+        await this.voxelizeModel()
         this._modelLoader.getElement().voxelModelData.forEach((voxel: VoxelModelData) => {
             this._modelLoader.getScene()?.get().add(voxel.mesh)
         })
@@ -82,6 +82,7 @@ export class ModelHandler {
         const gridSize = this._modelLoader.settings.gridSize;
         const boxSize = this._modelLoader.settings.boxSize;
         const boxRoundness = this._modelLoader.settings.boxRoundness;
+        const transparent = this._modelLoader.settings.transparent
         const maxDistance = Math.sqrt(3) * gridSize / 2;
         console.log('------ concreteList', concreteList);
         console.log('rays', rays)
@@ -94,7 +95,7 @@ export class ModelHandler {
 
                     for (const mesh of concreteList) {
                         if (this.checkCollision(centerPoint, mesh, maxDistance)) {
-                            const newVoxel = new VoxelModelData(centerPoint, boxSize, boxRoundness);
+                            const newVoxel = new VoxelModelData(centerPoint, boxSize, boxRoundness, transparent);
                             modelElement.voxelModelData.push(newVoxel);
                             this.geAllCollidingObjects(fromMeshes, newVoxel.mesh, newVoxel);
 
