@@ -181,8 +181,12 @@ export class ModelLoader extends CommonLoader {
             await this.settingFirstGroupModel();
             await this.filterReinforcingBar();
 
+            const timestampStart = window.performance.now();
+
             await this._handle.voxelizeModel();
             this._handle.detectRebarAndVoxel();
+
+            console.log(`Success took ${window.performance.now() - timestampStart} ms`);
         }
     }
 
@@ -406,22 +410,24 @@ export class ModelLoader extends CommonLoader {
         }
     }
 
-    public showVoxelByColor(type: number) {
+    public showVoxelByColor(color: string) {
         const scene = this.getScene()?.get();
         const modelElement = this.getElement();
         if (scene && modelElement) {
-            const filteredVoxels = modelElement.voxelModelData.filter(voxel => voxel.mesh.children[1].material.color.getHex() === type);
+            const filteredVoxels = modelElement.voxelModelData.filter(voxel => voxel.color === color);
             filteredVoxels.forEach(voxel => {
                 scene.add(voxel.mesh);
             });
         }
     }
 
-    public hideVoxelByColor(type: number) {
+    public hideVoxelByColor(color: string) {
+
         const scene = this.getScene()?.get();
         const modelElement = this.getElement();
+
         if (scene && modelElement) {
-            const filteredVoxels = modelElement.voxelModelData.filter(voxel => voxel.mesh.children[1].material.color.getHex() === type);
+            const filteredVoxels = modelElement.voxelModelData.filter(voxel => voxel.color === color);
             filteredVoxels.forEach(voxel => {
                 scene.remove(voxel.mesh);
             });

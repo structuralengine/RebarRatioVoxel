@@ -7,6 +7,8 @@ import {MeshBVH} from "three-mesh-bvh";
 export const voxelEdgeMaterial = new THREE.LineBasicMaterial({ color: '#3c3c3c', opacity: 0.4 });
 export const voxelMaterial = new THREE.MeshBasicMaterial({ color: '#057400', opacity: 0.4, transparent: true });
 
+export const defaultColor = '#057400';
+
 export class VoxelModelData {
     public readonly id: string
     public center: THREE.Vector3
@@ -14,6 +16,7 @@ export class VoxelModelData {
     public boxRoundness: number
     public transparent: number
     public mesh: THREE.Object3D
+    public color: string
     public reBarList: FragmentMesh[]
 
     constructor(center: THREE.Vector3, boxSize: number, boxRoundness: number = 0, transparent: number) {
@@ -24,12 +27,13 @@ export class VoxelModelData {
         this.mesh = this.createVoxelMesh(center, boxSize, boxRoundness, transparent);
         this.id = this.mesh.uuid;
         this.reBarList = [];
+        this.color = defaultColor;
     }
 
     private createVoxelMesh(pointCenter: THREE.Vector3, boxSize: number, boxRoundness: number = 0, transparent: number): THREE.Object3D {
         const geometry = new RoundedBoxGeometry(boxSize, boxSize, boxSize, 0.1, boxRoundness)
         const voxelEdgeMaterial = new THREE.LineBasicMaterial({ color: '#3c3c3c', opacity: transparent });
-        const voxelMaterial = new THREE.MeshBasicMaterial({ color: '#057400', opacity: transparent, transparent: true });
+        const voxelMaterial = new THREE.MeshBasicMaterial({ color: this.color, opacity: transparent, transparent: true });
 
         const edges = new THREE.EdgesGeometry(geometry);
         const line = new THREE.LineSegments(edges, voxelEdgeMaterial.clone());
@@ -55,6 +59,7 @@ export class VoxelModelData {
 
 
 export class ModelElement {
+    // @ts-ignore
     private _modelLoader: ModelLoader;
     public concreteList: FragmentMesh[];
     public concreteVolume: number;
@@ -99,6 +104,7 @@ export class ModelElement {
             const objectBoundingBox = new THREE.Box3().setFromObject(concrete);
             this.boundingBoxConcrete.union(objectBoundingBox);
 
+            // @ts-ignore
             concrete.convertGeometry = this.renderConvertGeometry(concrete);
         }
 
@@ -123,6 +129,7 @@ export class ModelElement {
                 rebar.geometry.attributes.position.needsUpdate = true;
             }
 
+            // @ts-ignore
             rebar.convertGeometry = this.renderConvertGeometry(rebar);
         }
     }
@@ -145,6 +152,8 @@ export class ModelElement {
         }
         convertGeometry.computeBoundingBox()
         convertGeometry.computeBoundingSphere()
+
+        // @ts-ignore
         convertGeometry.boundsTree = new MeshBVH(convertGeometry);
         return  convertGeometry;
     }
