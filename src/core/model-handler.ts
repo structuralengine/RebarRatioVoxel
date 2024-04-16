@@ -77,6 +77,10 @@ export class ModelHandler {
         const timestampStart = new Date().getTime();
         const gridSize = this._modelLoader.settings.gridSize;
         const boxSize = this._modelLoader.settings.boxSize;
+
+        // const gridSize = 0.18;
+        // const boxSize = 0.18;
+
         const boxRoundness = this._modelLoader.settings.boxRoundness;
         const maxDistance = Math.sqrt(3) * gridSize / 2;
         console.log('rays', rays)
@@ -88,8 +92,8 @@ export class ModelHandler {
                     const centerPoint = new THREE.Vector3(x + gridSize / 2, y + gridSize / 2, z + gridSize / 2);
 
                     const box = new THREE.Box3()
-                    box.min.setScalar( -gridSize/2 ).add( centerPoint );
-                    box.max.setScalar( gridSize/2 ).add( centerPoint );
+                    box.min.setScalar( -gridSize ).add( centerPoint );
+                    box.max.setScalar( gridSize ).add( centerPoint );
 
                     for (let i = 0; i < concreteList.length; i++) {
                         const mesh = concreteList[i];
@@ -199,7 +203,7 @@ export class ModelHandler {
                 box.max.setScalar( voxel.boxSize ).add( voxel.center );
 
                 const geometry = rebar.convertGeometry;
-                const value = this.shapeCast(rebar, geometry, box);
+                const value = this.shapeCast(rebar, geometry, firstMesh, voxel.boxSize);
 
                 if (value) {
                     voxel.reBarList.push(rebar)
@@ -222,8 +226,19 @@ export class ModelHandler {
         });
     }
 
-    private shapeCast(targetMesh: FragmentMesh, geometry: BufferGeometry, box: THREE.Box3) {
-        const invMat = new THREE.Matrix4().copy(targetMesh.matrixWorld).invert();
-        return geometry.boundsTree.intersectsBox( box, invMat );
+    private shapeCast(targetMesh: FragmentMesh, geometry: BufferGeometry, shape: THREE.Mesh, boxSize: number) {
+        const transformMatrix =
+            new THREE.Matrix4()
+                .copy( targetMesh.matrixWorld ).invert()
+                .multiply( shape.matrixWorld );
+
+        const box = new THREE.Box3();
+        box.min.set( -boxSize, -boxSize, -boxSize);
+        box.max.set( boxSize, boxSize, boxSize);
+
+        return geometry.boundsTree.intersectsBox( box, transformMatrix );
+        // const invMat = new THREE.Matrix4().copy(targetMesh.matrixWorld).invert();
+        // return geometry.boundsTree.intersectsBox( box, invMat );
     }
+
 }
