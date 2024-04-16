@@ -29,8 +29,8 @@ const ShowHideVoxel = ({id, name, isShow, onChange, onShow, onRemove}: ItemEleme
 
     return (
         <div>
-            <input type="checkbox" id={id} name="checkbox" checked={isShow} onChange={handleOnChange}/>
-            <label htmlFor={id}> {name}</label>
+            <input type="checkbox" id={id} className='checkbox' name="checkbox" checked={isShow} onChange={handleOnChange}/>
+            <label className='element' htmlFor={id}> {name}</label>
         </div>
     );
 };

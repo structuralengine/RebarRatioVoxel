@@ -3,6 +3,10 @@ import ItemElementShow, { ItemElementType } from "./ItemElementShow.tsx";
 import { ViewerContext } from "../../../../contexts";
 import { IFCBUILDINGELEMENTPROXY, IFCREINFORCINGBAR } from "web-ifc";
 
+type ElementShowProps = {
+    setIsVoxelChecked: React.Dispatch<React.SetStateAction<boolean>>;
+};
+
 const items: ItemElementType[] = [
     {
         id: 'all',
@@ -26,7 +30,7 @@ const items: ItemElementType[] = [
     }
 ]
 
-const ElementShow = () => {
+const ElementShow = ({ setIsVoxelChecked }: ElementShowProps) => {
     const [menuItem, setMenuItem] = useState<ItemElementType[]>(items)
 
     const { loaded, modelLoader, isSetting, setIsSetting } = useContext(ViewerContext)
@@ -60,6 +64,7 @@ const ElementShow = () => {
     }, [isSetting])
 
     const handleOnChangeShow = useCallback(async (id: string, status: boolean) => {
+
         const menus = menuItem.map((item: ItemElementType) => {
             if (id !== 'all' && !status && item.id === 'all') {
                 return {
@@ -93,6 +98,7 @@ const ElementShow = () => {
             }
             case 'voxel': {
                 modelLoader?.showVoxelModel()
+                setIsVoxelChecked(true)
                 break
             }
         }
@@ -110,6 +116,7 @@ const ElementShow = () => {
             }
             case 'voxel': {
                 modelLoader?.hideVoxelModel()
+                setIsVoxelChecked(false)
                 setIsSetting(false)
                 break
             }

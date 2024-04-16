@@ -12,27 +12,27 @@ const items: ItemElementType[] = [
     },
     {
         id: 'color 0',
-        name: '0x00d4ff',
+        name: 'Blue',
         isShow: false
     },
     {
         id: 'color 1',
-        name: '0x09e8cd',
+        name: 'Aqua',
         isShow: false
     },
     {
         id: 'color 2',
-        name: '0x09e810',
+        name: 'Green',
         isShow: false
     },
     {
         id: 'color 3',
-        name: '0xe8de09',
+        name: 'Yellow',
         isShow: false
     },
     {
         id: 'color 4',
-        name: '0xe80909',
+        name: 'Red',
         isShow: false
     }
 ]
@@ -130,11 +130,20 @@ const ShowHideVoxelElement = () => {
     }, [modelLoader])
 
     return (
-        <div className='element-show-container'>
-            <br />
-            <h4 style={{ textAlign: 'center', width: '100%', display: 'inline-block' }}>Show/Hide Voxel</h4>
-            {menuItem.map((item: ItemElementType) => <ShowHideVoxel key={item.id} id={item.id} name={item.name} isShow={item.isShow} onChange={handleOnChangeShow} onShow={handleShowModel} onRemove={handleRemoveModel} />)}
-        </div>
+        <>
+            <div className='header'>Show/Hide Voxel By Color</div>
+            <div className='body'>
+                <div className='element-show-container'>
+                    {menuItem.map((item: ItemElementType) =>
+                        <ShowHideVoxel key={item.id} id={item.id} name={item.name} isShow={item.isShow}
+                            onChange={handleOnChangeShow}
+                            onShow={handleShowModel}
+                            onRemove={handleRemoveModel}
+                        />
+                    )}
+                </div>
+            </div>
+        </>
     );
 };
 
