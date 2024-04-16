@@ -1,12 +1,13 @@
 import * as THREE from 'three';
 import * as OBC from 'openbim-components';
+
 import {fileToUint8Array} from "../utils/file.ts";
 import {Fragment, FragmentMesh} from "bim-fragment";
 import {CommonLoader} from "./common-loader.ts";
 import {ModelHandler} from "./model-handler.ts";
 import {IFCBUILDINGELEMENTPROXY, IFCREINFORCINGBAR} from "web-ifc";
 import {ModelElement, VoxelModelData} from "./model-element.ts";
-import { add } from 'three/examples/jsm/libs/tween.module.js';
+
 export const defaultVolume = 300;
 export const defaultGridSize = 0.5;
 
@@ -14,23 +15,32 @@ export class ModelSetting {
     public gridSize: number;
     public boxSize: number;
     public boxRoundness: number;
+    public minSizeLimit: number;
 
     constructor() {
         this.gridSize = defaultGridSize;
         this.boxSize = defaultGridSize;
         this.boxRoundness = 0.01;
+        this.minSizeLimit = defaultGridSize;
     }
 
     setup(volume: number) {
         const newSize = this.calculateScale(volume);
         this.gridSize = newSize;
         this.boxSize = newSize;
+        this.minSizeLimit = newSize;
+    }
+
+    setupSetting(setting: any) {
+        this.gridSize = setting.gridSize
+        this.boxSize = setting.boxSize
+        this.boxRoundness = setting.boxRoundness
     }
 
     private calculateScale(volume: number) {
         const volumeScaleMap = [
-            { volume: 300, scale: 0.4 },
-            { volume: 1000, scale: 0.5 },
+            { volume: 300, scale: 0.2 },
+            { volume: 1000, scale: 0.3 },
             { volume: 2000, scale: 0.6 },
             { volume: 3000, scale: 0.7 },
             { volume: 4000, scale: 0.8 },
@@ -58,12 +68,14 @@ export class ModelLoader extends CommonLoader {
     private _file: File | null;
     private _handle: ModelHandler
     public settings: ModelSetting
-    private _absoluteMax: THREE.Vector3 ;
+    private _absoluteMax: THREE.Vector3;
     private _absoluteMin: THREE.Vector3;
-    private _elements: ModelElement
+    private _elements: ModelElement;
+    private _visibleVoxel: boolean;
+    public _callBack: (value: boolean) => void;
+    public _cleanViewer: () => void;
 
-
-    constructor(container : HTMLDivElement, file: File) {
+    constructor(container: HTMLDivElement, file: File, callBack: (value: boolean) => void, cleanUpViewer: () => void) {
         super(container)
         this._file = file;
         this._handle = new ModelHandler(this)
@@ -71,10 +83,21 @@ export class ModelLoader extends CommonLoader {
         this._elements = new ModelElement(this)
         this._absoluteMax = new THREE.Vector3();
         this._absoluteMin = new THREE.Vector3();
+        this._callBack = callBack
+        this._cleanViewer = cleanUpViewer
+        this._visibleVoxel = true
     }
 
     public getElement() {
         return this._elements;
+    }
+
+    public getSetting() {
+        return this.settings;
+    }
+
+    public reSetupLoadModel() {
+        this._handle.reSetupVoxel()
     }
 
     public async cleanUp() {
@@ -102,6 +125,28 @@ export class ModelLoader extends CommonLoader {
 
     private async loadModel() {
         if (this._file && this._scene) {
+            const mainToolbar = new OBC.Toolbar(this._components, {
+                name: "toc-editor-main-tooblar",
+                position: "bottom",
+            });
+            const voxelButton = new OBC.Button(this._components)
+            voxelButton.materialIcon = 'apps'
+            voxelButton.tooltip = 'Voxelize'
+            voxelButton.onClick.add(() => {
+                this._visibleVoxel = !this._visibleVoxel
+                this._callBack(!this._visibleVoxel)
+            })
+            const closeModelButton = new OBC.Button(this._components)
+            closeModelButton.materialIcon = 'cancel'
+            closeModelButton.tooltip = 'Close model'
+            closeModelButton.onClick.add(() => {
+                this._cleanViewer()
+                this._visibleVoxel = false
+                this._callBack(false)
+            })
+            mainToolbar.addChild(voxelButton)
+            mainToolbar.addChild(closeModelButton)
+            this._components.ui.addToolbar(mainToolbar)
             this._loader = new OBC.FragmentIfcLoader(this._components)
             await this._loader.setup(this._settings)
             const buffer = await fileToUint8Array(this._file)
@@ -111,9 +156,11 @@ export class ModelLoader extends CommonLoader {
                 item.mesh.computeBoundingBox()
             })
             console.log('groupModel', this._groupModel)
-            this._groupModel.items.map((item: Fragment) => {{
-                this.getBoudingBoxFormMesh(item.mesh)
-            }})
+            this._groupModel.items.map((item: Fragment) => {
+                {
+                    this.getBoudingBoxFormMesh(item.mesh)
+                }
+            })
 
             await this.settingFirstGroupModel();
             await this.filterReinforcingBar();
@@ -135,14 +182,14 @@ export class ModelLoader extends CommonLoader {
             const bottom = bbox.min.y;
             const threeGrid = grid.get();
             threeGrid.position.set(threeGrid.position.x, bottom, threeGrid.position.z)
-            this._camera?.controls.setLookAt(bbox.max.x*2, bbox.max.y*2, bbox.max.z*2,0,0,0)
+            this._camera?.controls.setLookAt(bbox.max.x * 2, bbox.max.y * 2, bbox.max.z * 2, 0, 0, 0)
 
             const light = new THREE.PointLight(0xffffff, 1);
-            light.position.set(bbox.max.x*2, bbox.max.y*2, bbox.max.z*2);
+            light.position.set(bbox.max.x * 2, bbox.max.y * 2, bbox.max.z * 2);
             this._scene?.get().add(light);
 
             const light2 = new THREE.PointLight(0xffffff, 1);
-            light2.position.set(bbox.max.x*-2, bbox.max.y*-2, bbox.max.z*-2);
+            light2.position.set(bbox.max.x * -2, bbox.max.y * -2, bbox.max.z * -2);
             this._scene?.get().add(light2);
 
             // set up high lighter

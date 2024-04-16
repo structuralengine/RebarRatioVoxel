@@ -1,12 +1,17 @@
-import {useCallback, useContext, useEffect, useState} from "react";
-import ItemElementShow, {ItemElementType} from "./ItemElementShow.tsx";
-import {ViewerContext} from "../../../../contexts";
-import {IFCBUILDINGELEMENTPROXY, IFCREINFORCINGBAR} from "web-ifc";
+import { useCallback, useContext, useEffect, useState } from "react";
+import ItemElementShow, { ItemElementType } from "./ItemElementShow.tsx";
+import { ViewerContext } from "../../../../contexts";
+import { IFCBUILDINGELEMENTPROXY, IFCREINFORCINGBAR } from "web-ifc";
 
 const items: ItemElementType[] = [
     {
         id: 'all',
         name: 'All',
+        isShow: false
+    },
+    {
+        id: 'voxel',
+        name: 'Voxel',
         isShow: false
     },
     {
@@ -24,22 +29,35 @@ const items: ItemElementType[] = [
 const ElementShow = () => {
     const [menuItem, setMenuItem] = useState<ItemElementType[]>(items)
 
-    const {loaded, modelLoader} = useContext(ViewerContext)
+    const { loaded, modelLoader, isSetting, setIsSetting } = useContext(ViewerContext)
 
     useEffect(() => {
         if (loaded) {
-            const menuItem = items.map((item: ItemElementType) => ({...item, isShow: true}))
+            const menuItem = items.map((item: ItemElementType) => ({ ...item, isShow: true }))
             setMenuItem(menuItem)
         } else {
-            const menuItem = items.map((item: ItemElementType) => ({...item, isShow: false}))
+            const menuItem = items.map((item: ItemElementType) => ({ ...item, isShow: false }))
             setMenuItem(menuItem)
         }
 
         return () => {
-            const menuItem = items.map((item: ItemElementType) => ({...item, isShow: false}))
+            const menuItem = items.map((item: ItemElementType) => ({ ...item, isShow: false }))
             setMenuItem(menuItem)
         }
     }, [loaded]);
+
+    useEffect(() => {
+        if (isSetting) {
+            const changeMenuItem = menuItem.map((item: ItemElementType) => {
+                if (item.id === 'voxel') {
+                    return ({ ...item, isShow: true })
+                } else {
+                    return item
+                }
+            })
+            setMenuItem(changeMenuItem)
+        }
+    }, [isSetting])
 
     const handleOnChangeShow = useCallback(async (id: string, status: boolean) => {
         const menus = menuItem.map((item: ItemElementType) => {
@@ -73,6 +91,10 @@ const ElementShow = () => {
                 modelLoader?.showModel(IFCREINFORCINGBAR)
                 break
             }
+            case 'voxel': {
+                modelLoader?.showVoxelModel()
+                break
+            }
         }
     }, [modelLoader])
 
@@ -86,15 +108,30 @@ const ElementShow = () => {
                 modelLoader?.removeModel(IFCREINFORCINGBAR)
                 break
             }
+            case 'voxel': {
+                modelLoader?.hideVoxelModel()
+                setIsSetting(false)
+                break
+            }
         }
     }, [modelLoader])
 
     return (
-        <div className='element-show-container'>
-            <br />
-            <h4 style={{textAlign: 'center', width: '100%', display: 'inline-block'}}>Element show</h4>
-            {menuItem.map((item: ItemElementType) => <ItemElementShow key={item.id} id={item.id} name={item.name} isShow={item.isShow} onChange={handleOnChangeShow} onShow={handleShowModel} onRemove={handleRemoveModel}/>)}
-        </div>
+        <>
+            <div className='header'>Element show</div>
+            <div className='body'>
+                <div className='element-show-container'>
+                    {menuItem.map((item: ItemElementType) =>
+                        <ItemElementShow key={item.id} id={item.id} name={item.name} isShow={item.isShow}
+                            onChange={handleOnChangeShow}
+                            onShow={handleShowModel}
+                            onRemove={handleRemoveModel}
+                        />
+                    )}
+                </div>
+            </div>
+        </>
+
     );
 };
 
