@@ -5,6 +5,10 @@ import { Fragment, FragmentMesh } from "bim-fragment";
 import { CommonLoader } from "./common-loader.ts";
 import { ModelHandler } from "./model-handler.ts";
 import { IFCBUILDINGELEMENTPROXY, IFCREINFORCINGBAR } from "web-ifc";
+import { ModelElement } from "./model-element.ts";
+import {MeshBVH, MeshBVHHelper} from "three-mesh-bvh";
+import {BufferGeometry} from "three";
+
 import { ModelElement, VoxelModelData } from "./model-element.ts";
 import { add } from 'three/examples/jsm/libs/tween.module.js';
 export const defaultVolume = 300;
@@ -44,22 +48,21 @@ export class ModelSetting {
     }
 
     private calculateScale(volume: number) {
-        console.log('------------- volume', volume)
         const volumeScaleMap = [
             { volume: 0, scale: 0.2 },
             { volume: 200, scale: 0.3 },
-            { volume: 500, scale: 0.4 },
-            { volume: 800, scale: 0.5 },
-            { volume: 1000, scale: 0.6 },
-            { volume: 1300, scale: 0.7 },
-            { volume: 1500, scale: 0.8 },
-            { volume: 1700, scale: 0.9 },
-            { volume: 2000, scale: 1 },
-            { volume: 3000, scale: 1.1 },
-            { volume: 5000, scale: 1.2 },
-            { volume: 10000, scale: 1.3 },
-            { volume: 15000, scale: 1.4 },
-            { volume: 20000, scale: 1.5 }
+            { volume: 600, scale: 0.4 },
+            { volume: 1000, scale: 0.5 },
+            { volume: 1300, scale: 0.6 },
+            { volume: 1500, scale: 0.7 },
+            { volume: 2000, scale: 0.8 },
+            { volume: 2500, scale: 0.9 },
+            { volume: 4000, scale: 1 },
+            { volume: 8000, scale: 1.1 },
+            { volume: 12000, scale: 1.2 },
+            { volume: 20000, scale: 1.3 },
+            { volume: 25000, scale: 1.4 },
+            { volume: 30000, scale: 1.5 }
         ];
 
         const last = volumeScaleMap[volumeScaleMap.length - 1];
@@ -178,7 +181,12 @@ export class ModelLoader extends CommonLoader {
             await this.settingFirstGroupModel();
             await this.filterReinforcingBar();
 
+            const timestampStart = window.performance.now();
+
             await this._handle.voxelizeModel();
+            this._handle.detectRebarAndVoxel();
+
+            console.log(`Success took ${window.performance.now() - timestampStart} ms`);
         }
     }
 
@@ -237,7 +245,6 @@ export class ModelLoader extends CommonLoader {
 
     public showVoxelModel() {
         this._handle.renderVoxelModel()
-        this._handle.detectRebarAndVoxel();
     }
 
     public hideVoxelModel() {
@@ -403,22 +410,24 @@ export class ModelLoader extends CommonLoader {
         }
     }
 
-    public showVoxelByColor(type: number) {
+    public showVoxelByColor(color: string) {
         const scene = this.getScene()?.get();
         const modelElement = this.getElement();
         if (scene && modelElement) {
-            const filteredVoxels = modelElement.voxelModelData.filter(voxel => voxel.mesh.children[1].material.color.getHex() === type);
+            const filteredVoxels = modelElement.voxelModelData.filter(voxel => voxel.color === color);
             filteredVoxels.forEach(voxel => {
                 scene.add(voxel.mesh);
             });
         }
     }
 
-    public hideVoxelByColor(type: number) {
+    public hideVoxelByColor(color: string) {
+
         const scene = this.getScene()?.get();
         const modelElement = this.getElement();
+
         if (scene && modelElement) {
-            const filteredVoxels = modelElement.voxelModelData.filter(voxel => voxel.mesh.children[1].material.color.getHex() === type);
+            const filteredVoxels = modelElement.voxelModelData.filter(voxel => voxel.color === color);
             filteredVoxels.forEach(voxel => {
                 scene.remove(voxel.mesh);
             });
