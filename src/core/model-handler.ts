@@ -83,7 +83,7 @@ export class ModelHandler {
                     const centerPoint = new THREE.Vector3(x + gridSize / 2, y + gridSize / 2, z + gridSize / 2);
 
                     for (const mesh of concreteList) {
-                        if (this.checkCollision(centerPoint, mesh, maxDistance)) {
+                        if (this.isInsideMesh(mesh, centerPoint) || this.checkCollision(centerPoint, mesh, maxDistance) ) {
                             const newVoxel = new VoxelModelData(centerPoint, boxSize, boxRoundness);
                             modelElement.voxelModelData.push(newVoxel);
                             const reinforcingBarInVoxel = this.geAllCollidingObjects(newVoxel.mesh);
@@ -148,6 +148,12 @@ export class ModelHandler {
         }
 
         return false;
+    }
+
+    private isInsideMesh(mesh: FragmentMesh, point: THREE.Vector3): boolean {
+        const raycaster = new THREE.Raycaster(point, new THREE.Vector3(1, 0, 0));
+        const intersects = raycaster.intersectObject(mesh);
+        return intersects.length % 2 === 1; 
     }
 
     public renderVoxelModel(isShow: boolean = true) {
