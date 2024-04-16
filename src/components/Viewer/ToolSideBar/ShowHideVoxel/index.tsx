@@ -15,33 +15,13 @@ const items: ItemElementType[] = [
         id: color.color,
         name: color.label,
         isShow: false
-    },
-    {
-        id: 'color 1',
-        name: '0x09e8cd',
-        isShow: false
-    },
-    {
-        id: 'color 2',
-        name: '0x09e810',
-        isShow: false
-    },
-    {
-        id: 'color 3',
-        name: '0xe8de09',
-        isShow: false
-    },
-    {
-        id: 'color 4',
-        name: '0xe80909',
-        isShow: false
-    }
+    }))
 ]
 
 const ShowHideVoxelElement = () => {
     const [menuItem, setMenuItem] = useState<ItemElementType[]>(items)
 
-    const { loaded, modelLoader, isSetting, setIsSetting} = useContext(ViewerContext)
+    const { loaded, modelLoader} = useContext(ViewerContext)
 
     useEffect(() => {
         if (loaded) {
