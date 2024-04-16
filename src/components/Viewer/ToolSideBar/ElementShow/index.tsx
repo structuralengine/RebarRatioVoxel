@@ -114,7 +114,7 @@ const ElementShow = () => {
                 break
             }
         }
-    }, [modelLoader])
+    }, [modelLoader, setIsSetting])
 
     return (
         <>
