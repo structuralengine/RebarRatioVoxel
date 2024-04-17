@@ -363,8 +363,6 @@ export class ModelLoader extends CommonLoader {
             if (z > max.z) max.z = z;
         }
 
-
-
         return new THREE.Box3(min, max);
     }
 
@@ -374,7 +372,7 @@ export class ModelLoader extends CommonLoader {
         if (scene && model) {
             switch (type) {
                 case IFCREINFORCINGBAR: {
-                    this._elements.reinforcingBarList.filter((item) => item.count === 569).forEach((item: FragmentMesh) => {
+                    this._elements.reinforcingBarList.forEach((item: FragmentMesh) => {
                         scene.add(item)
                     })
                     break
