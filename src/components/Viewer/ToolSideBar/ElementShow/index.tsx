@@ -3,10 +3,6 @@ import ItemElementShow, { ItemElementType } from "./ItemElementShow.tsx";
 import { ViewerContext } from "../../../../contexts";
 import { IFCBUILDINGELEMENTPROXY, IFCREINFORCINGBAR } from "web-ifc";
 
-type ElementShowProps = {
-    setIsVoxelChecked: React.Dispatch<React.SetStateAction<boolean>>;
-};
-
 const items: ItemElementType[] = [
     {
         id: 'all',
@@ -30,7 +26,7 @@ const items: ItemElementType[] = [
     }
 ]
 
-const ElementShow = ({ setIsVoxelChecked }: ElementShowProps) => {
+const ElementShow = () => {
     const [menuItem, setMenuItem] = useState<ItemElementType[]>(items)
 
     const { loaded, modelLoader } = useContext(ViewerContext)
