@@ -2,7 +2,9 @@ import * as THREE from "three";
 import {ModelLoader} from "./model-loader.ts";
 import {FragmentMesh} from "bim-fragment";
 import {VoxelModelData} from "./model-element.ts";
-import {BufferGeometry} from "three";
+import {BufferGeometry, MeshBasicMaterial} from "three";
+import {MeshBVH} from "three-mesh-bvh";
+import { CSG } from 'three-csg-ts';
 
 const rays = [
     // ray directions to the center of voxel
@@ -230,6 +232,7 @@ export class ModelHandler {
     public detectRebarAndVoxel() {
         this._modelLoader?.getScene()?.get().updateMatrixWorld()
         const rebarElement = this._modelLoader.getElement().reinforcingBarList;
+        this.test(rebarElement);
         this._modelLoader.getElement().voxelModelData.forEach((voxel: VoxelModelData) => {
             voxel.reBarList = []
             const firstMesh = voxel.mesh.children[1] as THREE.Mesh
@@ -282,6 +285,66 @@ export class ModelHandler {
         });
     }
 
+    private test(rebarElement: FragmentMesh[]) {
+        const voxel = this._modelLoader.getElement().voxelModelData[20];
+        voxel.reBarList = []
+        const firstMesh = voxel.mesh.children[1] as THREE.Mesh
+        firstMesh.updateMatrixWorld()
+        let count = 0;
+        rebarElement.map((rebar: FragmentMesh) => {
+            const sphere = rebar.boundingSphere;
+            if (!sphere) return
+
+            const box = new THREE.Box3()
+            box.min.setScalar( -voxel.boxSize ).add( voxel.center );
+            box.max.setScalar( voxel.boxSize ).add( voxel.center );
+
+            // @ts-ignore
+            const geometry = rebar.convertGeometry as BufferGeometry;
+            geometry.computeBoundingBox();
+            geometry.computeBoundingSphere();
+
+            const newMesh = new THREE.Mesh(geometry)
+
+            const interRes = CSG.intersect(newMesh, firstMesh);
+            interRes.position.add(voxel.center);
+
+            this._modelLoader.getScene()?.get().add(interRes)
+            console.log('---------- result', interRes)
+            if ( interRes) {
+                voxel.reBarList.push(rebar)
+                count++;
+            }
+        })
+
+        const l = voxel.reBarList.length;
+        const hoverMesh = voxel.mesh.children[1] as THREE.Mesh
+        let indexColor = 0;
+        if (l > 0 && l < 2) {
+            indexColor = 1;
+        } else if (l >= 2 && l < 5) {
+            indexColor = 2;
+        } else if (l >= 5 && l < 8) {
+            indexColor = 3;
+        } else if (l >= 8) {
+            indexColor = 4;
+        }
+
+        if (indexColor >= materialColorlist.length) {
+            indexColor = materialColorlist.length - 1;
+        }
+
+        voxel.color = materialColorlist[indexColor].color;
+        hoverMesh.material.color.set(voxel.color);
+        for (let item of voxel.reBarList) {
+            const itemMesh = (item as THREE.Mesh).material.clone();
+            itemMesh.color.set(voxel.color);
+
+            item.material = itemMesh;
+            item.material.needsUpdate = true;
+        }
+    }
+
     private shapeCast(targetMesh: FragmentMesh, geometry: BufferGeometry, shape: THREE.Mesh, voxel: VoxelModelData) {
         const transformMatrix =
             new THREE.Matrix4()
@@ -292,7 +355,6 @@ export class ModelHandler {
         box.min.set( -voxel.boxSize/2,-voxel.boxSize/2,-voxel.boxSize/2 );
         box.max.set( voxel.boxSize/2,voxel.boxSize/2,voxel.boxSize/2 );
 
-        // @ts-ignore
         return geometry.boundsTree.intersectsBox( box, transformMatrix );
     }
 

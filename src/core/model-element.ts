@@ -3,6 +3,7 @@ import {ModelLoader} from "./model-loader.ts";
 import {FragmentMesh} from "bim-fragment";
 import {RoundedBoxGeometry} from "three/examples/jsm/geometries/RoundedBoxGeometry.js";
 import {MeshBVH} from "three-mesh-bvh";
+import {BoxGeometry} from "three";
 
 export const voxelEdgeMaterial = new THREE.LineBasicMaterial({ color: '#3c3c3c', opacity: 0.4 });
 export const voxelMaterial = new THREE.MeshBasicMaterial({ color: '#057400', opacity: 0.4, transparent: true });
@@ -31,14 +32,17 @@ export class VoxelModelData {
     }
 
     private createVoxelMesh(pointCenter: THREE.Vector3, boxSize: number, boxRoundness: number = 0, transparent: number): THREE.Object3D {
-        const geometry = new RoundedBoxGeometry(boxSize, boxSize, boxSize, 0.1, boxRoundness)
+        // const geometry = new RoundedBoxGeometry(boxSize, boxSize, boxSize, 0.1, boxRoundness)
+        const geometry = new BoxGeometry(boxSize, boxSize, boxSize)
+        geometry.computeBoundingBox()
+        geometry.computeBoundingSphere()
+
         const voxelEdgeMaterial = new THREE.LineBasicMaterial({ color: '#3c3c3c', opacity: transparent });
         const voxelMaterial = new THREE.MeshBasicMaterial({ color: this.color, opacity: transparent, transparent: true });
 
         const edges = new THREE.EdgesGeometry(geometry);
         const line = new THREE.LineSegments(edges, voxelEdgeMaterial.clone());
         line.position.copy(pointCenter)
-
 
         const voxelBlock = new THREE.Mesh(geometry, voxelMaterial.clone());
         voxelBlock.position.copy(pointCenter);
@@ -47,7 +51,6 @@ export class VoxelModelData {
         voxelBlock.updateMatrixWorld()
         voxelBlock.geometry.computeBoundingBox()
         voxelBlock.geometry.computeBoundingSphere()
-
 
         const mergedObject = new THREE.Object3D();
         mergedObject.add(line)
