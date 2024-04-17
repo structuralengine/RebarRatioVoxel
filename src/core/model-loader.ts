@@ -153,9 +153,11 @@ export class ModelLoader extends CommonLoader {
             voxelButton.materialIcon = 'apps'
             voxelButton.tooltip = 'Voxelize'
             voxelButton.onClick.add(() => {
-                this._handle.voxelizeModel();
-                this._handle.detectRebarAndVoxel();
-                this._visibleVoxel = !this._visibleVoxel
+                if(this._visibleVoxel) {
+                    this._handle.voxelizeModel();
+                    this._handle.detectRebarAndVoxel();
+                }
+                this._visibleVoxel = !this._visibleVoxel  
                 this._callBack(!this._visibleVoxel)
             })
             const closeModelButton = new OBC.Button(this._components)
