@@ -60,6 +60,16 @@ export class ModelHandler {
         })
     }
 
+    public async reRenderVoxel( boxSize: number, boxRoundness: number, transparent: number) {
+        this._modelLoader.getElement().voxelModelData.forEach((voxel: VoxelModelData) => {
+            this._modelLoader.getScene()?.get().remove(voxel.mesh)
+        })
+        this._modelLoader.getElement().voxelModelData.forEach((voxel: VoxelModelData) => {
+            voxel.mesh = voxel.createVoxelMesh(voxel.center, boxSize, boxRoundness, transparent)
+            this._modelLoader.getScene()?.get().add(voxel.mesh)
+        })
+    }
+
     public async voxelizeModel() {
         const modelElement = this._modelLoader.getElement();
         const concreteList = modelElement.concreteList;
@@ -82,7 +92,7 @@ export class ModelHandler {
 
         const gridSize = this._modelLoader.settings.gridSize;
         const boxSize = this._modelLoader.settings.boxSize;
-
+        console.log(gridSize, boxSize )
         // const gridSize = 0.18;
         // const boxSize = 0.18;
 

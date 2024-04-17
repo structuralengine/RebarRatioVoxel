@@ -117,6 +117,9 @@ export class ModelLoader extends CommonLoader {
         this._handle.detectRebarAndVoxel()
     }
 
+    public async reRenderVoxel(boxSize : number, boxRoundness : number, transparent : number) {
+        await this._handle.reRenderVoxel(boxSize, boxRoundness, transparent)
+    }
     public async cleanUp() {
         await super.cleanUp()
         if (this._file) {
@@ -150,6 +153,8 @@ export class ModelLoader extends CommonLoader {
             voxelButton.materialIcon = 'apps'
             voxelButton.tooltip = 'Voxelize'
             voxelButton.onClick.add(() => {
+                this._handle.voxelizeModel();
+                this._handle.detectRebarAndVoxel();
                 this._visibleVoxel = !this._visibleVoxel
                 this._callBack(!this._visibleVoxel)
             })
@@ -184,8 +189,8 @@ export class ModelLoader extends CommonLoader {
 
             const timestampStart = window.performance.now();
 
-            await this._handle.voxelizeModel();
-            this._handle.detectRebarAndVoxel();
+            // await this._handle.voxelizeModel();
+            // this._handle.detectRebarAndVoxel();
 
             console.log(`Success took ${window.performance.now() - timestampStart} ms`);
         }
@@ -375,7 +380,7 @@ export class ModelLoader extends CommonLoader {
         if (scene && model) {
             switch (type) {
                 case IFCREINFORCINGBAR: {
-                    this._elements.reinforcingBarList.filter((item) => item.count === 569).forEach((item: FragmentMesh) => {
+                    this._elements.reinforcingBarList.forEach((item: FragmentMesh) => {
                         scene.add(item)
                     })
                     break
