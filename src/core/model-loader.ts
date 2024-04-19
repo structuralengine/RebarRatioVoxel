@@ -114,8 +114,12 @@ export class ModelLoader extends CommonLoader {
 
     public async reSetupLoadModel() {
         await this._handle.reSetupVoxel()
+        this._handle.detectRebarAndVoxel()
     }
 
+    public async reRenderVoxel(boxSize : number, boxRoundness : number, transparent : number) {
+        await this._handle.reRenderVoxel(boxSize, boxRoundness, transparent)
+    }
     public async cleanUp() {
         await super.cleanUp()
         if (this._file) {
@@ -149,7 +153,11 @@ export class ModelLoader extends CommonLoader {
             voxelButton.materialIcon = 'apps'
             voxelButton.tooltip = 'Voxelize'
             voxelButton.onClick.add(() => {
-                this._visibleVoxel = !this._visibleVoxel
+                if(this._visibleVoxel) {
+                    this._handle.voxelizeModel();
+                    this._handle.detectRebarAndVoxel();
+                }
+                this._visibleVoxel = !this._visibleVoxel  
                 this._callBack(!this._visibleVoxel)
             })
             const closeModelButton = new OBC.Button(this._components)
@@ -183,8 +191,8 @@ export class ModelLoader extends CommonLoader {
 
             const timestampStart = window.performance.now();
 
-            await this._handle.voxelizeModel();
-            this._handle.detectRebarAndVoxel();
+            // await this._handle.voxelizeModel();
+            // this._handle.detectRebarAndVoxel();
 
             console.log(`Success took ${window.performance.now() - timestampStart} ms`);
         }

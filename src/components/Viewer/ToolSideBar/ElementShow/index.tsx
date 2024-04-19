@@ -47,6 +47,7 @@ const ElementShow = () => {
     }, [loaded]);
 
     const handleOnChangeShow = useCallback(async (id: string, status: boolean) => {
+
         const menus = menuItem.map((item: ItemElementType) => {
             if (id !== 'all' && !status && item.id === 'all') {
                 return {

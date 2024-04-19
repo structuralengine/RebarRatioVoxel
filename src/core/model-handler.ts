@@ -60,6 +60,16 @@ export class ModelHandler {
         })
     }
 
+    public async reRenderVoxel( boxSize: number, boxRoundness: number, transparent: number) {
+        this._modelLoader.getElement().voxelModelData.forEach((voxel: VoxelModelData) => {
+            this._modelLoader.getScene()?.get().remove(voxel.mesh)
+        })
+        this._modelLoader.getElement().voxelModelData.forEach((voxel: VoxelModelData) => {
+            voxel.mesh = voxel.createVoxelMesh(voxel.center, boxSize, boxRoundness, transparent)
+            this._modelLoader.getScene()?.get().add(voxel.mesh)
+        })
+    }
+
     public async voxelizeModel() {
         const modelElement = this._modelLoader.getElement();
         const concreteList = modelElement.concreteList;
@@ -82,7 +92,7 @@ export class ModelHandler {
 
         const gridSize = this._modelLoader.settings.gridSize;
         const boxSize = this._modelLoader.settings.boxSize;
-
+        console.log(gridSize, boxSize )
         // const gridSize = 0.18;
         // const boxSize = 0.18;
 
@@ -125,6 +135,33 @@ export class ModelHandler {
                 }
             }
         }
+
+        // for (let x = boundingBoxOfConcrete.min.x; x <= boundingBoxOfConcrete.max.x; x += gridSize) {
+        //     for (let y = boundingBoxOfConcrete.min.y; y <= boundingBoxOfConcrete.max.y; y += gridSize) {
+        //         for (let z = boundingBoxOfConcrete.min.z; z <= boundingBoxOfConcrete.max.z; z += gridSize) {
+        //             const centerPoint = new THREE.Vector3(x + gridSize / 2, y + gridSize / 2, z + gridSize / 2);
+        //
+        //             const box = new THREE.Box3()
+        //             box.min.setScalar( -gridSize ).add( centerPoint );
+        //             box.max.setScalar( gridSize ).add( centerPoint );
+        //
+        //             for (let i = 0; i < concreteList.length; i++) {
+        //                 const mesh = concreteList[i];
+        //                 const geometry = mesh.convertGeometry;
+        //
+        //                 // if (this.checkCollision(centerPoint, mesh, maxDistance)) {
+        //                 //     modelElement.voxelModelData.push(new VoxelModelData(centerPoint, boxSize, boxRoundness));
+        //                 //     break;
+        //                 // }
+        //
+        //                 if (this.checkCollisionByBVH(centerPoint, box, mesh, geometry)) {
+        //                     modelElement.voxelModelData.push(new VoxelModelData(centerPoint, boxSize, boxRoundness));
+        //                     break;
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
 
         // Old algorithm
         // for (let x = boundingBoxOfConcrete.min.x; x <= boundingBoxOfConcrete.max.x; x += gridSize) {

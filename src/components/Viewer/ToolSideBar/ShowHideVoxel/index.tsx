@@ -21,7 +21,7 @@ const items: ItemElementType[] = [
 const ShowHideVoxelElement = () => {
     const [menuItem, setMenuItem] = useState<ItemElementType[]>(items)
 
-    const { loaded, modelLoader } = useContext(ViewerContext)
+    const { loaded, modelLoader} = useContext(ViewerContext)
 
     useEffect(() => {
         if (loaded) {
