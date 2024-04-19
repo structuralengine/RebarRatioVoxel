@@ -6,8 +6,8 @@ import { CommonLoader } from "./common-loader.ts";
 import { ModelHandler } from "./model-handler.ts";
 import { IFCBUILDINGELEMENTPROXY, IFCREINFORCINGBAR } from "web-ifc";
 import { ModelElement } from "./model-element.ts";
-import {MeshBVH, MeshBVHHelper} from "three-mesh-bvh";
-import {BufferGeometry} from "three";
+import { MeshBVH, MeshBVHHelper } from "three-mesh-bvh";
+import { BufferGeometry } from "three";
 
 import { ModelElement, VoxelModelData } from "./model-element.ts";
 import { add } from 'three/examples/jsm/libs/tween.module.js';
@@ -88,10 +88,10 @@ export class ModelLoader extends CommonLoader {
     private _absoluteMin: THREE.Vector3;
     private _elements: ModelElement;
     private _visibleVoxel: boolean;
-    public _callBack: (value: boolean) => void;
+    public _callBack: (value: boolean, isloading: boolean) => void;
     public _cleanViewer: () => void;
 
-    constructor(container: HTMLDivElement, file: File, callBack: (value: boolean) => void, cleanUpViewer: () => void) {
+    constructor(container: HTMLDivElement, file: File, callBack: (value: boolean, isloading: boolean) => void, cleanUpViewer: () => void) {
         super(container)
         this._file = file;
         this._handle = new ModelHandler(this)
@@ -117,7 +117,7 @@ export class ModelLoader extends CommonLoader {
         this._handle.detectRebarAndVoxel()
     }
 
-    public async reRenderVoxel(boxSize : number, boxRoundness : number, transparent : number) {
+    public async reRenderVoxel(boxSize: number, boxRoundness: number, transparent: number) {
         await this._handle.reRenderVoxel(boxSize, boxRoundness, transparent)
     }
     public async cleanUp() {
@@ -153,12 +153,15 @@ export class ModelLoader extends CommonLoader {
             voxelButton.materialIcon = 'apps'
             voxelButton.tooltip = 'Voxelize'
             voxelButton.onClick.add(() => {
-                if(this._visibleVoxel) {
-                    this._handle.voxelizeModel();
-                    this._handle.detectRebarAndVoxel();
-                }
-                this._visibleVoxel = !this._visibleVoxel  
-                this._callBack(!this._visibleVoxel)
+                this._callBack(this._visibleVoxel, false)
+                setTimeout(() => {
+                    this._callBack(this._visibleVoxel, true)
+                    if (this._visibleVoxel) {
+                        this._handle.voxelizeModel();
+                        this._handle.detectRebarAndVoxel();
+                    }
+                    this._visibleVoxel = !this._visibleVoxel
+                }, 100)
             })
             const closeModelButton = new OBC.Button(this._components)
             closeModelButton.materialIcon = 'cancel'
@@ -166,7 +169,7 @@ export class ModelLoader extends CommonLoader {
             closeModelButton.onClick.add(() => {
                 this._cleanViewer()
                 this._visibleVoxel = false
-                this._callBack(false)
+                this._callBack(false, false)
             })
             mainToolbar.addChild(voxelButton)
             mainToolbar.addChild(closeModelButton)
