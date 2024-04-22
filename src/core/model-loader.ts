@@ -189,10 +189,6 @@ export class ModelLoader extends CommonLoader {
             await this.filterReinforcingBar();
 
             const timestampStart = window.performance.now();
-
-            // await this._handle.voxelizeModel();
-            // this._handle.detectRebarAndVoxel();
-
             console.log(`Success took ${window.performance.now() - timestampStart} ms`);
         }
     }
