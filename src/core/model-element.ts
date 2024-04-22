@@ -1,8 +1,10 @@
 import * as THREE from "three";
 import {ModelLoader} from "./model-loader.ts";
 import {FragmentMesh} from "bim-fragment";
-import {RoundedBoxGeometry} from "three/examples/jsm/geometries/RoundedBoxGeometry.js";
 import {MeshBVH} from "three-mesh-bvh";
+import {MeshBasicMaterial} from "three";
+import {mergeGeometries} from "three/examples/jsm/utils/BufferGeometryUtils.js";
+import {RoundedBoxGeometry} from "three/examples/jsm/geometries/RoundedBoxGeometry.js";
 
 export const voxelEdgeMaterial = new THREE.LineBasicMaterial({ color: '#3c3c3c', opacity: 0.4 });
 export const voxelMaterial = new THREE.MeshBasicMaterial({ color: '#057400', opacity: 0.4, transparent: true });
@@ -23,22 +25,25 @@ export class VoxelModelData {
         this.center = center;
         this.boxSize = boxSize;
         this.boxRoundness = boxRoundness;
-        this.transparent = transparent
+        this.transparent = transparent;
+        this.color = defaultColor;
         this.mesh = this.createVoxelMesh(center, boxSize, boxRoundness, transparent);
         this.id = this.mesh.uuid;
         this.reBarList = [];
-        this.color = defaultColor;
     }
 
     public createVoxelMesh(pointCenter: THREE.Vector3, boxSize: number, boxRoundness: number = 0, transparent: number): THREE.Object3D {
         const geometry = new RoundedBoxGeometry(boxSize, boxSize, boxSize, 0.1, boxRoundness)
+        // const geometry = new BoxGeometry(boxSize, boxSize, boxSize)
+        geometry.computeBoundingBox()
+        geometry.computeBoundingSphere()
+
         const voxelEdgeMaterial = new THREE.LineBasicMaterial({ color: '#3c3c3c', opacity: transparent });
         const voxelMaterial = new THREE.MeshBasicMaterial({ color: this.color, opacity: transparent, transparent: true });
 
         const edges = new THREE.EdgesGeometry(geometry);
         const line = new THREE.LineSegments(edges, voxelEdgeMaterial.clone());
         line.position.copy(pointCenter)
-
 
         const voxelBlock = new THREE.Mesh(geometry, voxelMaterial.clone());
         voxelBlock.position.copy(pointCenter);
@@ -47,7 +52,6 @@ export class VoxelModelData {
         voxelBlock.updateMatrixWorld()
         voxelBlock.geometry.computeBoundingBox()
         voxelBlock.geometry.computeBoundingSphere()
-
 
         const mergedObject = new THREE.Object3D();
         mergedObject.add(line)
@@ -61,30 +65,49 @@ export class VoxelModelData {
 export class ModelElement {
     // @ts-ignore
     private _modelLoader: ModelLoader;
-    public concreteList: FragmentMesh[];
+    private _concreteList: FragmentMesh[];
     public concreteVolume: number;
-    public reinforcingBarList: FragmentMesh[];
+    private _reinforcingBarList: FragmentMesh[];
     public boundingBoxConcrete?: THREE.Box3;
     public voxelModelData: VoxelModelData[]
 
+    public concreteMesh?: THREE.Mesh;
+    public reinforcingBarMesh?: THREE.Mesh;
+
     constructor(modelLoader: ModelLoader) {
         this._modelLoader = modelLoader;
-        this.concreteList = [];
+        this._concreteList = [];
         this.concreteVolume = 0;
-        this.reinforcingBarList = [];
+        this._reinforcingBarList = [];
         this.voxelModelData = [];
     }
 
     public cleanUp() {
-        this.concreteList = []
-        this.reinforcingBarList = []
+        this._concreteList = []
+        this._reinforcingBarList = []
         this.voxelModelData = []
     }
 
+    set concreteList(list: any[]) {
+        this._concreteList = list;
+    }
+
+    get concreteList() {
+        return this._concreteList;
+    }
+
+    set reinforcingBarList(list: any[]) {
+        this._reinforcingBarList = list;
+    }
+
+    get reinforcingBarList() {
+        return this._reinforcingBarList;
+    }
+
     public setup() {
+        const concreteGeoList = []
         this.boundingBoxConcrete = new THREE.Box3();
-        for (const concrete of this.concreteList) {
-            console.log('concrete info', concrete)
+        for (const concrete of this._concreteList) {
             concrete.computeBoundingBox();
             concrete.computeBoundingSphere();
 
@@ -104,15 +127,24 @@ export class ModelElement {
             const objectBoundingBox = new THREE.Box3().setFromObject(concrete);
             this.boundingBoxConcrete.union(objectBoundingBox);
 
+            concreteGeoList.push(this.renderConvertGeometry(concrete))
+        }
+
+        if (concreteGeoList.length > 0) {
+            const alConcreteGeometry = mergeGeometries(concreteGeoList)
+            alConcreteGeometry.computeBoundingBox()
+            alConcreteGeometry.computeBoundingSphere()
             // @ts-ignore
-            concrete.convertGeometry = this.renderConvertGeometry(concrete);
+            alConcreteGeometry.boundsTree = new MeshBVH(alConcreteGeometry);
+            this.concreteMesh = new THREE.Mesh(alConcreteGeometry, new MeshBasicMaterial({color: '#bfc3c9'}))
         }
 
         const size = new THREE.Vector3();
         this.boundingBoxConcrete.getSize(size)
         this.concreteVolume = size.x * size.y * size.z;
 
-        for (const rebar of this.reinforcingBarList) {
+        const rebarGeoList = []
+        for (const rebar of this._reinforcingBarList) {
             rebar.computeBoundingBox();
             rebar.computeBoundingSphere();
 
@@ -129,32 +161,31 @@ export class ModelElement {
                 rebar.geometry.attributes.position.needsUpdate = true;
             }
 
-            // @ts-ignore
-            rebar.convertGeometry = this.renderConvertGeometry(rebar);
+            rebarGeoList.push(this.renderConvertGeometry(rebar))
         }
+
+        if (rebarGeoList.length > 0) {
+            const alReBarGeometry = mergeGeometries(rebarGeoList)
+            alReBarGeometry.computeBoundingBox()
+            alReBarGeometry.computeBoundingSphere()
+            // @ts-ignore
+            alReBarGeometry.boundsTree = new MeshBVH(alReBarGeometry);
+            this.reinforcingBarMesh = new THREE.Mesh(alReBarGeometry, new MeshBasicMaterial({color: '#bfc3c9'}))
+        }
+
     }
 
     private renderConvertGeometry(mesh: FragmentMesh) {
-        const convertGeometry =  mesh.geometry.clone();
-        const instanceMatrix = mesh.instanceMatrix.array;
-        const numInstances = instanceMatrix.length / 16;
-        for (let i = 0; i < numInstances; i++) {
-            const instanceIndex = i * 16;
-            const matrix = new THREE.Matrix4();
-            matrix.fromArray(instanceMatrix.slice(instanceIndex, instanceIndex + 16));
+        const geometries = [];
+        const dummy = new THREE.Object3D();
 
-            convertGeometry.attributes.position.applyMatrix4(matrix);
-            convertGeometry.attributes.position.needsUpdate = true;
-
-            convertGeometry.attributes.normal = mesh.geometry.attributes.normal.clone();
-            convertGeometry.attributes.normal.applyMatrix4(matrix);
-            convertGeometry.attributes.normal.needsUpdate = true;
+        for (let i = 0; i < mesh.count; i++) {
+            const geometry = mesh.geometry.clone();
+            mesh.getMatrixAt(i, dummy.matrix);
+            geometry.applyMatrix4(dummy.matrix);
+            geometries.push(geometry);
         }
-        convertGeometry.computeBoundingBox()
-        convertGeometry.computeBoundingSphere()
 
-        // @ts-ignore
-        convertGeometry.boundsTree = new MeshBVH(convertGeometry);
-        return  convertGeometry;
+        return  mergeGeometries(geometries);
     }
 }
