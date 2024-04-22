@@ -6,11 +6,7 @@ import { CommonLoader } from "./common-loader.ts";
 import { ModelHandler } from "./model-handler.ts";
 import { IFCBUILDINGELEMENTPROXY, IFCREINFORCINGBAR } from "web-ifc";
 import { ModelElement } from "./model-element.ts";
-import {MeshBVH, MeshBVHHelper} from "three-mesh-bvh";
-import {BufferGeometry} from "three";
 
-import { ModelElement, VoxelModelData } from "./model-element.ts";
-import { add } from 'three/examples/jsm/libs/tween.module.js';
 export const defaultVolume = 300;
 export const defaultGridSize = 0.5;
 
@@ -153,8 +149,12 @@ export class ModelLoader extends CommonLoader {
             voxelButton.materialIcon = 'apps'
             voxelButton.tooltip = 'Voxelize'
             voxelButton.onClick.add(() => {
-                if(this._visibleVoxel) {
-                    this._handle.voxelizeModel();
+                if (this._visibleVoxel) {
+                    if(this._elements.voxelModelData.length === 0 ) {
+                        this._handle.voxelizeModel();
+                    } else {
+                        this._handle.renderVoxelModel()
+                    }
                     this._handle.detectRebarAndVoxel();
                 }
                 this._visibleVoxel = !this._visibleVoxel  
@@ -191,9 +191,6 @@ export class ModelLoader extends CommonLoader {
 
             const timestampStart = window.performance.now();
 
-            // await this._handle.voxelizeModel();
-            // this._handle.detectRebarAndVoxel();
-
             console.log(`Success took ${window.performance.now() - timestampStart} ms`);
         }
     }
@@ -202,8 +199,11 @@ export class ModelLoader extends CommonLoader {
         if (this._groupModel) {
             const materialManager = this._tools.get(OBC.MaterialManager);
             const meshes = this._groupModel.items.map((frag: Fragment) => frag.mesh);
-            materialManager.addMeshes('white', meshes);
-            materialManager.set(true, ["white"]);
+            const color = new THREE.Color(0xbfc3c9);
+            const material = new THREE.MeshBasicMaterial({color: color});
+            materialManager.addMaterial("material", material)
+            materialManager.addMeshes("material", meshes);
+            materialManager.set(true, ["material"]);
 
             // set up grid and camera
             const grid = this._tools.get(OBC.SimpleGrid);
