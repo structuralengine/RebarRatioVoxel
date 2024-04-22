@@ -6,11 +6,7 @@ import { CommonLoader } from "./common-loader.ts";
 import { ModelHandler } from "./model-handler.ts";
 import { IFCBUILDINGELEMENTPROXY, IFCREINFORCINGBAR } from "web-ifc";
 import { ModelElement } from "./model-element.ts";
-import {MeshBVH, MeshBVHHelper} from "three-mesh-bvh";
-import {BufferGeometry} from "three";
 
-import { ModelElement, VoxelModelData } from "./model-element.ts";
-import { add } from 'three/examples/jsm/libs/tween.module.js';
 export const defaultVolume = 300;
 export const defaultGridSize = 0.5;
 
@@ -184,8 +180,7 @@ export class ModelLoader extends CommonLoader {
             const timestampStart = window.performance.now();
 
             await this._handle.voxelizeModel();
-            this._handle.detectRebarAndVoxel();
-
+            // this._handle.detectRebarAndVoxel();
             console.log(`Success took ${window.performance.now() - timestampStart} ms`);
         }
     }
@@ -254,12 +249,13 @@ export class ModelLoader extends CommonLoader {
     public async filterReinforcingBar() {
         if (this._groupModel) {
             const proProxies = await this._groupModel?.getAllPropertiesOfType(IFCBUILDINGELEMENTPROXY)
+            let concreteKeys: string[] = []
             if (proProxies) {
                 const valueOfObjects = Object.values(proProxies)
                 const expressIDArray = valueOfObjects.map((d) => d.expressID)
                 const fragmentIdList = this._groupModel.getFragmentMap(expressIDArray);
-                const idKeys = Object.keys(fragmentIdList)
-                this._elements.concreteList = this._groupModel.children.filter((f) => idKeys.find(id => id === f.uuid) !== undefined) as FragmentMesh[]
+                concreteKeys = Object.keys(fragmentIdList)
+                this._elements.concreteList = this._groupModel.children.filter((f) => concreteKeys.find(id => id === f.uuid) !== undefined) as FragmentMesh[]
             }
 
             const proReBar = await this._groupModel?.getAllPropertiesOfType(IFCREINFORCINGBAR)
@@ -268,7 +264,10 @@ export class ModelLoader extends CommonLoader {
                 const expressIDArray = valueOfObjects.map((d) => d.expressID)
                 const fragmentIdList = this._groupModel.getFragmentMap(expressIDArray);
                 const idKeys = Object.keys(fragmentIdList)
-                this._elements.reinforcingBarList = this._groupModel.children.filter((f) => idKeys.find(id => id === f.uuid) !== undefined) as FragmentMesh[]
+                    // .filter(id => concreteKeys.find(a => a === id) === undefined)
+                this._elements.reinforcingBarList = this._groupModel.children
+                    .filter((f) =>
+                        idKeys.find(id => id === f.uuid) !== undefined) as FragmentMesh[]
             }
 
             this._elements.setup();
@@ -363,8 +362,6 @@ export class ModelLoader extends CommonLoader {
             if (z > max.z) max.z = z;
         }
 
-
-
         return new THREE.Box3(min, max);
     }
 
@@ -374,15 +371,16 @@ export class ModelLoader extends CommonLoader {
         if (scene && model) {
             switch (type) {
                 case IFCREINFORCINGBAR: {
-                    this._elements.reinforcingBarList.filter((item) => item.count === 569).forEach((item: FragmentMesh) => {
-                        scene.add(item)
-                    })
+                    if (this._elements.reinforcingBarMesh) {
+                        scene.add(this._elements.reinforcingBarMesh)
+                    }
+
                     break
                 }
                 case IFCBUILDINGELEMENTPROXY: {
-                    this._elements.concreteList.forEach((item: FragmentMesh) => {
-                        scene.add(item)
-                    })
+                    if (this._elements.concreteMesh) {
+                        scene.add(this._elements.concreteMesh)
+                    }
                     break
                 }
             }
@@ -395,15 +393,16 @@ export class ModelLoader extends CommonLoader {
         if (scene && model) {
             switch (type) {
                 case IFCREINFORCINGBAR: {
-                    this._elements.reinforcingBarList.forEach((item: FragmentMesh) => {
-                        scene.remove(item)
-                    })
+                    if (this._elements.reinforcingBarMesh) {
+                        scene.remove(this._elements.reinforcingBarMesh)
+                    }
+
                     break
                 }
                 case IFCBUILDINGELEMENTPROXY: {
-                    this._elements.concreteList.forEach((item: FragmentMesh) => {
-                        scene.remove(item)
-                    })
+                    if (this._elements.concreteMesh) {
+                        scene.remove(this._elements.concreteMesh)
+                    }
                     break
                 }
             }
