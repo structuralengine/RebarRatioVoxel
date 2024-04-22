@@ -1,8 +1,10 @@
 import * as THREE from "three";
 import {ModelLoader} from "./model-loader.ts";
 import {VoxelModelData} from "./model-element.ts";
-import {BufferGeometry} from "three";
-import {MeshBVH} from "three-mesh-bvh";
+import {BoxGeometry, BufferGeometry, MeshBasicMaterial} from "three";
+import {MeshBVH, MeshBVHHelper} from "three-mesh-bvh";
+import {CSG} from "three-csg-ts";
+import {c} from "vite/dist/node/types.d-aGj9QkWt";
 
 export const materialColorlist = [
     { color: '#00d4ff', label: '#00d4ff' },
@@ -139,56 +141,84 @@ export class ModelHandler {
     }
 
     public detectRebarAndVoxel() {
-        // this._modelLoader?.getScene()?.get().updateMatrixWorld()
-        // this._modelLoader.getElement().voxelModelData.forEach((voxel: VoxelModelData) => {
-        //     voxel.reBarList = []
-        //     const firstMesh = voxel.mesh.children[1] as THREE.Mesh
-        //     firstMesh.updateMatrixWorld()
-        //     let count = 0;
-        //     rebarElement.map((rebar: FragmentMesh) => {
-        //         const sphere = rebar.boundingSphere;
-        //         if (!sphere) return
-        //
-        //         const box = new THREE.Box3()
-        //         box.min.setScalar( -voxel.boxSize ).add( voxel.center );
-        //         box.max.setScalar( voxel.boxSize ).add( voxel.center );
-        //
-        //         // @ts-ignore
-        //         const geometry = rebar.convertGeometry;
-        //         const value = this.shapeCast(rebar, geometry, firstMesh, voxel);
-        //
-        //         if (value) {
-        //             voxel.reBarList.push(rebar)
-        //             count++;
-        //         }
-        //     })
-        //
-        //     const l = voxel.reBarList.length;
-        //     const hoverMesh = voxel.mesh.children[1] as THREE.Mesh
-        //     let indexColor = 0;
-        //     if (l > 0 && l < 2) {
-        //         indexColor = 1;
-        //     } else if (l >= 2 && l < 5) {
-        //         indexColor = 2;
-        //     } else if (l >= 5 && l < 8) {
-        //         indexColor = 3;
-        //     } else if (l >= 8) {
-        //         indexColor = 4;
-        //     }
-        //
-        //     if (indexColor >= materialColorlist.length) {
-        //         indexColor = materialColorlist.length - 1;
-        //     }
-        //
-        //     voxel.color = materialColorlist[indexColor].color;
-        //     hoverMesh.material.color.set(voxel.color);
-        //     for (let item of voxel.reBarList) {
-        //         const itemMesh = (item as THREE.Mesh).material.clone();
-        //         itemMesh.color.set(voxel.color);
-        //
-        //         item.material = itemMesh;
-        //         item.material.needsUpdate = true;
-        //     }
-        // });
+        this._modelLoader?.getScene()?.get().updateMatrixWorld()
+
+        const rebar = this._modelLoader.getElement().reinforcingBarMesh;
+        if (!rebar) return;
+        rebar.traverse((child: any) => {
+            if (child instanceof THREE.Mesh) {
+                child.material.side = THREE.DoubleSide;
+            }
+        });
+
+        const gridSize = 0.05;
+        const modelElement: VoxelModelData[] = []
+
+        this._modelLoader.getElement().voxelModelData.forEach((voxel: VoxelModelData) => {
+            // const voxel = this._modelLoader.getElement().voxelModelData[100]
+            voxel.reBarList = []
+            const firstMesh = voxel.mesh.children[1] as THREE.Mesh
+
+            const minX = voxel.center.x - voxel.boxSize / 2;
+            const minY = voxel.center.y - voxel.boxSize / 2;
+            const minZ = voxel.center.z - voxel.boxSize / 2;
+
+            const maxX = voxel.center.x + voxel.boxSize / 2;
+            const maxY = voxel.center.y + voxel.boxSize / 2;
+            const maxZ = voxel.center.z + voxel.boxSize / 2;
+
+            let count = 0;
+            // New algorithm
+            for (let x = minX; x <= maxX; x += gridSize) {
+                for (let y = minY; y < maxY; y += gridSize) {
+                    for (let z = minZ; z < maxZ; z += gridSize) {
+                        const centerPoint = new THREE.Vector3(x, y, z);
+
+                        const box = new THREE.Box3()
+                        box.min.setScalar( -gridSize/2 ).add( centerPoint );
+                        box.max.setScalar( gridSize/2 ).add( centerPoint );
+
+                        if (this.checkCollisionByBVH(centerPoint, box, rebar.matrixWorld, rebar.geometry)) {
+                            count++;
+                        }
+                    }
+                }
+            }
+
+            const volumeOfMesh = count * (gridSize ** 3 )
+            const voumeOfVoxel = voxel.boxSize ** 3;
+
+            const ratio = volumeOfMesh * 100 / voumeOfVoxel;
+
+            const hoverMesh = voxel.mesh.children[1] as THREE.Mesh
+            let indexColor = 0;
+            if (ratio > 0 && ratio < 15) {
+                indexColor = 1;
+            } else if (ratio >= 15 && ratio < 25) {
+                indexColor = 2;
+            } else if (ratio >= 35 && ratio < 50) {
+                indexColor = 3;
+            } else if (ratio >= 50) {
+                indexColor = 4;
+            }
+
+            if (indexColor >= materialColorlist.length) {
+                indexColor = materialColorlist.length - 1;
+            }
+
+            voxel.color = materialColorlist[indexColor].color;
+            hoverMesh.material.color.set(voxel.color);
+            for (let item of voxel.reBarList) {
+                const itemMesh = (item as THREE.Mesh).material.clone();
+                itemMesh.color.set(voxel.color);
+
+                item.material = itemMesh;
+                item.material.needsUpdate = true;
+            }
+        });
+
+        // console.log('----------- modelElement', modelElement)
+        // const arr = modelElement.map(v => v.mesh);
+
     }
 }
