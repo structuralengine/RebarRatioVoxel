@@ -81,7 +81,7 @@ export class ModelHandler {
 
         const gridSize = this._modelLoader.settings.gridSize;
         const boxSize = this._modelLoader.settings.boxSize;
-
+        console.log(gridSize, boxSize )
         // const gridSize = 0.18;
         // const boxSize = 0.18;
 

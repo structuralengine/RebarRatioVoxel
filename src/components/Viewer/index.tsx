@@ -14,6 +14,8 @@ const Viewer = () => {
     const [modelLoader, setModelLoader] = useState<ModelLoader | undefined>(undefined);
     const [voxelized, setVoxelized] = useState<boolean | undefined>(undefined)
 
+    console.log('loaded', loaded)
+
     useEffect(() => {
         return () => {
             cleanUpViewer().then(() => setLoaded(undefined))
@@ -26,34 +28,19 @@ const Viewer = () => {
         }
     }, [voxelized, modelLoader])
 
-    // useEffect(() => {
-    //     console.log('loaded', loaded)
-    //     console.log('isSetting', isSetting)
-    //     if (isSetting && loaded === false) {
-    //         // modelLoader?.settings.setupSetting(isSetting)
-    //         // modelLoader?.reSetupLoadModel()
-    //         Promise.all([modelLoader?.reSetupLoadModel()])
-    //         // if (response?.isSuccess) {
-    //             setLoaded(true)
-    //             setIsSetting(undefined)
-    //         // }
-    //     }
-    // }, [isSetting, loaded])
-
-    const handleVoxelModel = (value: boolean | undefined) => {
+    const handleVoxelModel = useCallback((value: boolean | undefined, isLoading: boolean) => {
         if (value) {
-            setLoaded(false)
+            setLoaded(isLoading)
         } else {
             setLoaded(undefined)
         }
         setVoxelized(value)
-
-    }
+    }, [])
 
     const handleGetFileFromDrop = useCallback(async (file: File) => {
         if (viewerRef?.current !== null) {
             setLoaded(false)
-            const loader = new ModelLoader(viewerRef.current, file, (value) => handleVoxelModel(value), cleanUpViewer);
+            const loader = new ModelLoader(viewerRef.current, file, (value, isLoading) => handleVoxelModel(value, isLoading), cleanUpViewer);
             const isLoaded = await loader.setup();
             if (isLoaded) {
                 setLoaded(true)

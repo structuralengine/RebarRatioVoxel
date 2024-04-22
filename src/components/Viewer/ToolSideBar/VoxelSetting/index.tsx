@@ -1,5 +1,6 @@
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { ViewerContext } from "../../../../contexts";
+import { ModelHandler } from '../../../../core';
 
 export type DataSettingsProps = {
     gridSize: number,
@@ -9,7 +10,7 @@ export type DataSettingsProps = {
 }
 
 const VoxelSetting = () => {
-    const { modelLoader, setLoaded } = useContext(ViewerContext)
+    const { modelLoader ,setLoaded } = useContext(ViewerContext)
     const [data, setData] = useState<DataSettingsProps>({
         gridSize: 0,
         boxSize: 0,
@@ -20,7 +21,6 @@ const VoxelSetting = () => {
 
     useEffect(() => {
         if (modelLoader) {
-            setLoaded(true)
             setData({
                 gridSize: modelLoader?.getSetting().gridSize,
                 boxSize: modelLoader?.getSetting().boxSize,
@@ -91,9 +91,19 @@ const VoxelSetting = () => {
 
     const handleApplySetting = useCallback(async () => {
         setLoaded(false)
-        modelLoader?.settings.setupSetting(data)
-        await modelLoader?.reSetupLoadModel()
-        setLoaded(true)
+        setTimeout(() => {
+            if(data.gridSize !== modelLoader?.getSetting().gridSize) {
+                modelLoader?.settings.setupSetting(data)
+                modelLoader?.reSetupLoadModel()
+            } 
+            if(data.boxSize !== modelLoader?.getSetting().boxSize 
+                || data.boxRoundness !== modelLoader?.getSetting().boxRoundness
+                || data.transparent !== modelLoader?.getSetting().transparent) {
+                    modelLoader?.settings.setupSetting(data)
+                    modelLoader?.reRenderVoxel(data.boxSize, data.boxRoundness, data.transparent)
+            }
+            setLoaded(true)
+        }, 100)
     }, [data])
 
     return (
