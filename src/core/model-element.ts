@@ -32,7 +32,7 @@ export class VoxelModelData {
         this.color = defaultColor;
     }
 
-    private createVoxelMesh(pointCenter: THREE.Vector3, boxSize: number, boxRoundness: number = 0, transparent: number): THREE.Object3D {
+    public createVoxelMesh(pointCenter: THREE.Vector3, boxSize: number, boxRoundness: number = 0, transparent: number): THREE.Object3D {
         const geometry = new RoundedBoxGeometry(boxSize, boxSize, boxSize, 0.1, boxRoundness)
         // const geometry = new BoxGeometry(boxSize, boxSize, boxSize)
         geometry.computeBoundingBox()

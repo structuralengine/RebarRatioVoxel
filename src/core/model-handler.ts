@@ -62,6 +62,16 @@ export class ModelHandler {
         })
     }
 
+    public async reRenderVoxel( boxSize: number, boxRoundness: number, transparent: number) {
+        this._modelLoader.getElement().voxelModelData.forEach((voxel: VoxelModelData) => {
+            this._modelLoader.getScene()?.get().remove(voxel.mesh)
+        })
+        this._modelLoader.getElement().voxelModelData.forEach((voxel: VoxelModelData) => {
+            voxel.mesh = voxel.createVoxelMesh(voxel.center, boxSize, boxRoundness, transparent)
+            this._modelLoader.getScene()?.get().add(voxel.mesh)
+        })
+    }
+
     public async voxelizeModel() {
         const modelElement = this._modelLoader.getElement();
         const boundingBoxOfConcrete = modelElement.boundingBoxConcrete;
@@ -81,7 +91,7 @@ export class ModelHandler {
 
         const gridSize = this._modelLoader.settings.gridSize;
         const boxSize = this._modelLoader.settings.boxSize;
-
+        console.log(gridSize, boxSize )
         // const gridSize = 0.18;
         // const boxSize = 0.18;
 
@@ -113,14 +123,69 @@ export class ModelHandler {
 
                     if (this.checkCollisionByBVH(centerPoint, box, concreteMesh.matrixWorld, concreteMesh.geometry)) {
                         modelElement.voxelModelData.push(new VoxelModelData(centerPoint, boxSize, boxRoundness, transparent));
+                    for (let c = 0; c < concreteList.length; c++) {
+                        const mesh = concreteList[c];
+
+                        // @ts-ignore
+                        const geometry = mesh.convertGeometry;
+                        if (this.checkCollisionByBVH(centerPoint, box, mesh, geometry)) {
+                            modelElement.voxelModelData.push(new VoxelModelData(centerPoint, boxSize, boxRoundness, transparent));
+                            break;
+                        }
                     }
                 }
             }
         }
 
+        // for (let x = boundingBoxOfConcrete.min.x; x <= boundingBoxOfConcrete.max.x; x += gridSize) {
+        //     for (let y = boundingBoxOfConcrete.min.y; y <= boundingBoxOfConcrete.max.y; y += gridSize) {
+        //         for (let z = boundingBoxOfConcrete.min.z; z <= boundingBoxOfConcrete.max.z; z += gridSize) {
+        //             const centerPoint = new THREE.Vector3(x + gridSize / 2, y + gridSize / 2, z + gridSize / 2);
+        //
+        //             const box = new THREE.Box3()
+        //             box.min.setScalar( -gridSize ).add( centerPoint );
+        //             box.max.setScalar( gridSize ).add( centerPoint );
+        //
+        //             for (let i = 0; i < concreteList.length; i++) {
+        //                 const mesh = concreteList[i];
+        //                 const geometry = mesh.convertGeometry;
+        //
+        //                 // if (this.checkCollision(centerPoint, mesh, maxDistance)) {
+        //                 //     modelElement.voxelModelData.push(new VoxelModelData(centerPoint, boxSize, boxRoundness));
+        //                 //     break;
+        //                 // }
+        //
+        //                 if (this.checkCollisionByBVH(centerPoint, box, mesh, geometry)) {
+        //                     modelElement.voxelModelData.push(new VoxelModelData(centerPoint, boxSize, boxRoundness));
+        //                     break;
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
+
         console.log('Voxel data length: ', modelElement.voxelModelData.length)
     }
 
+    // Old algorithm check collision
+    private checkCollision(point: THREE.Vector3, mesh: FragmentMesh, maxDistance: number) {
+        const raycaster = this._modelLoader.getRaycaster()?.get();
+        if (!raycaster) return false;
+
+        for (const rayDirection of rays) {
+            raycaster.set(point, rayDirection);
+            const intersects = raycaster.intersectObject(mesh);
+            if (intersects.length > 0) {
+                for (let intersect of intersects) {
+                    if (intersect.distance <= maxDistance) {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
 
     // New algorithm check collision
     private checkCollisionByBVH(center: THREE.Vector3, box: THREE.Box3, matrixWorld: THREE.Matrix4, geometry: BufferGeometry) {
@@ -133,13 +198,31 @@ export class ModelHandler {
         const rayX = new THREE.Ray();
         rayX.direction.set( 1, 0, 0 );
 
+        const rayY = new THREE.Ray();
+        rayY.direction.set( 0, 1, 0 );
+
+        const rayZ = new THREE.Ray();
+        rayZ.direction.set( 0, 0, 1 );
+
         if (res) {
             return true;
         } else {
             rayX.origin.copy( center ).applyMatrix4( invMat );
             const resX = bvh.raycastFirst( rayX, THREE.DoubleSide );
+            const resX = geometry.boundsTree.raycastFirst( rayX, THREE.DoubleSide );
+
+            rayY.origin.copy( center ).applyMatrix4( invMat );
+            const resY = geometry.boundsTree.raycastFirst( rayY, THREE.DoubleSide );
+
+            rayZ.origin.copy( center ).applyMatrix4( invMat );
+            const resZ = geometry.boundsTree.raycastFirst( rayZ, THREE.DoubleSide );
+
             if (
                 resX && resX.face && resX.face.normal.dot( rayX.direction ) > 0
+                resX && resX.face.normal.dot( rayX.direction ) > 0 ||
+                resY && resY.face.normal.dot( rayY.direction ) > 0 ||
+                resZ && resZ.face.normal.dot( rayZ.direction ) > 0
+
             ) {
                 return true;
             }
