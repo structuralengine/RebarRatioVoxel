@@ -152,7 +152,6 @@ export class ModelLoader extends CommonLoader {
                 if (this._visibleVoxel) {
                     if(this._elements.voxelModelData.length === 0 ) {
                         this._handle.voxelizeModel();
-                        this._handle.voxelizeReforcingBar(this._elements.voxelModelData[213]);
                     } else {
                         this._handle.renderVoxelModel()
                     }
