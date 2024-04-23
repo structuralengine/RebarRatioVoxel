@@ -1,17 +1,17 @@
-import { left } from '@popperjs/core';
 import { ChangeEvent, useCallback, useEffect } from 'react';
 
 export type ItemElementType = {
     id: string
     name: string
     ratio: string
+    quantity : number
     isShow: boolean
     onChange?: (id: string, status: boolean) => void
     onShow?: (id: string) => void
     onRemove?: (id: string) => void
 }
 
-const ShowHideVoxel = ({ id, name, ratio, isShow, onChange, onShow, onRemove }: ItemElementType) => {
+const ShowHideVoxel = ({ id, name, ratio, quantity, isShow, onChange, onShow, onRemove }: ItemElementType) => {
 
     useEffect(() => {
         if (isShow) {
@@ -35,7 +35,7 @@ const ShowHideVoxel = ({ id, name, ratio, isShow, onChange, onShow, onRemove }: 
             <label className="element" htmlFor={id}>
                 <div className="square element" style={{ background: `${name.replace('0x', '#')}`, padding: `${name === 'All' ? 0 : '6px'}` }}>{name === 'All' && name }  </div>  
             </label>
-            <label style={{marginLeft: '5px'}} className="element">{ratio}</label>
+            <label style={{marginLeft: '5px'}} className="element">{ratio} ({quantity})</label>
         </div>
     );
 };
