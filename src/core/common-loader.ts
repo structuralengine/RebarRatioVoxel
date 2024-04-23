@@ -105,15 +105,6 @@ export class CommonLoader {
         const clipper = this._components.tools.get(OBC.EdgesClipper);
         clipper.enabled = true;
 
-        const map = this._components.tools.get(OBC.MiniMap);
-        const mapCanvas = map.uiElement.get("canvas");
-        mapCanvas.domElement.style.bottom = "5rem";
-
-        this._components.ui.add(mapCanvas);
-        map.lockRotation = false;
-        map.zoom = 0.2;
-        map.frontOffset = 4;
-
         const modelTree = new OBC.FragmentTree(this._components);
         modelTree.init();
         mainToolbar.addChild(modelTree.uiElement.get("main"));
@@ -184,7 +175,6 @@ export class CommonLoader {
         navCube.offset = 0.5;
 
         plans.onNavigated.add(() => {
-            map.enabled = false;
             navCube.visible = false;
 
             materialManager.setBackgroundColor(new THREE.Color('white'));
@@ -192,7 +182,6 @@ export class CommonLoader {
         });
 
         plans.onExited.add(() => {
-            map.enabled = true;
             navCube.visible = true;
             materialManager.resetBackgroundColor();
             materialManager.set(false, ["white"]);
