@@ -149,16 +149,19 @@ export class ModelLoader extends CommonLoader {
             voxelButton.materialIcon = 'apps'
             voxelButton.tooltip = 'Voxelize'
             voxelButton.onClick.add(() => {
-                if (this._visibleVoxel) {
-                    if(this._elements.voxelModelData.length === 0 ) {
-                        this._handle.voxelizeModel();
-                    } else {
-                        this._handle.renderVoxelModel()
+                this._callBack(this._visibleVoxel, false)
+                setTimeout(() => {
+                    if (this._visibleVoxel) {
+                        this._callBack(this._visibleVoxel, true)
+                        if (this._elements.voxelModelData.length === 0) {
+                            this._handle.voxelizeModel();
+                        } else {
+                            this._handle.renderVoxelModel()
+                        }
+                        this._handle.detectRebarAndVoxel();
                     }
-                    this._handle.detectRebarAndVoxel();
-                }
-                this._visibleVoxel = !this._visibleVoxel  
-                this._callBack(!this._visibleVoxel, true)
+                    this._visibleVoxel = !this._visibleVoxel
+                }, 100)
             })
             const closeModelButton = new OBC.Button(this._components)
             closeModelButton.materialIcon = 'cancel'
@@ -200,7 +203,7 @@ export class ModelLoader extends CommonLoader {
             const materialManager = this._tools.get(OBC.MaterialManager);
             const meshes = this._groupModel.items.map((frag: Fragment) => frag.mesh);
             const color = new THREE.Color(0xbfc3c9);
-            const material = new THREE.MeshBasicMaterial({color: color});
+            const material = new THREE.MeshBasicMaterial({ color: color });
             materialManager.addMaterial("material", material)
             materialManager.addMeshes("material", meshes);
             materialManager.set(true, ["material"]);
@@ -277,7 +280,7 @@ export class ModelLoader extends CommonLoader {
                 const expressIDArray = valueOfObjects.map((d) => d.expressID)
                 const fragmentIdList = this._groupModel.getFragmentMap(expressIDArray);
                 const idKeys = Object.keys(fragmentIdList)
-                    // .filter(id => concreteKeys.find(a => a === id) === undefined)
+                // .filter(id => concreteKeys.find(a => a === id) === undefined)
                 this._elements.reinforcingBarList = this._groupModel.children
                     .filter((f) =>
                         idKeys.find(id => id === f.uuid) !== undefined) as FragmentMesh[]
