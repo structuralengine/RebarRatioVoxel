@@ -5,14 +5,15 @@ import { VoxelModelData } from "./model-element.ts";
 import { BufferGeometry, MeshBasicMaterial } from "three";
 import { MeshBVH } from "three-mesh-bvh";
 import { CSG } from 'three-csg-ts';
-
+import { INTERSECTION, Brush, Evaluator, computeMeshVolume } from 'three-bvh-csg';
+ 
 
 export const materialColorlist = [
-    { color: '#00d4ff', label: '#00d4ff' },
-    { color: '#09e8cd', label: '#09e8cd' },
-    { color: '#09e810', label: '#09e810' },
-    { color: '#e8de09', label: '#e8de09' },
-    { color: '#e80909', label: '#e80909' }
+    { color: '#00d4ff', label: '#00d4ff', ratio: '0%' },
+    { color: '#09e8cd', label: '#09e8cd', ratio: '0% - 15%' },
+    { color: '#09e810', label: '#09e810', ratio: '15% - 25%' },
+    { color: '#e8de09', label: '#e8de09', ratio: '35% - 50%' },
+    { color: '#e80909', label: '#e80909', ratio: ' > 50%' }
 ]
 export class ModelHandler {
     private _modelLoader: ModelLoader
@@ -102,9 +103,7 @@ export class ModelHandler {
         }
 
         console.log('Voxel data length: ', modelElement.voxelModelData.length)
-        console.log(modelElement.reinforcingBarMesh)
     }
-
 
     // New algorithm check collision
     private checkCollisionByBVH(center: THREE.Vector3, box: THREE.Box3, matrixWorld: THREE.Matrix4, geometry: BufferGeometry) {
@@ -117,13 +116,28 @@ export class ModelHandler {
         const rayX = new THREE.Ray();
         rayX.direction.set(1, 0, 0);
 
+        const rayY = new THREE.Ray();
+        rayY.direction.set(0, 1, 0);
+
+        const rayZ = new THREE.Ray();
+        rayZ.direction.set(0, 0, 1);
+
         if (res) {
             return true;
         } else {
             rayX.origin.copy(center).applyMatrix4(invMat);
             const resX = bvh.raycastFirst(rayX, THREE.DoubleSide);
+
+            rayY.origin.copy(center).applyMatrix4(invMat);
+            const resY = bvh.raycastFirst(rayY, THREE.DoubleSide);
+
+            rayZ.origin.copy(center).applyMatrix4(invMat);
+            const resZ = bvh.raycastFirst(rayZ, THREE.DoubleSide);
             if (
-                resX && resX.face && resX.face.normal.dot(rayX.direction) > 0
+                resX && resX.face && resX.face.normal.dot(rayX.direction) > 0 &&
+                resY && resY.face && resY.face.normal.dot(rayY.direction) > 0 &&
+                resZ && resZ.face && resZ.face.normal.dot(rayZ.direction) > 0
+
             ) {
                 return true;
             }
@@ -153,8 +167,7 @@ export class ModelHandler {
             }
         });
 
-        const gridSize = 0.05;
-
+        const gridSize = 0.05
         this._modelLoader.getElement().voxelModelData.forEach((voxel: VoxelModelData) => {
             voxel.reBarList = []
             const minX = voxel.center.x - voxel.boxSize / 2;
@@ -183,6 +196,7 @@ export class ModelHandler {
                     }
                 }
             }
+
             const volumeOfMesh = count * (gridSize ** 3)
             const voumeOfVoxel = voxel.boxSize ** 3;
 

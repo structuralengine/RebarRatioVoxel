@@ -9,11 +9,13 @@ const items: ItemElementType[] = [
     {
         id: 'all',
         name: 'All',
+        ratio: '',
         isShow: false
     },
     ...materialColorlist.map((color) => ({
         id: color.color,
         name: color.label,
+        ratio: color.ratio,
         isShow: false
     }))
 ]
@@ -73,7 +75,7 @@ const ShowHideVoxelElement = () => {
         <div className='header'>Show/Hide Voxel by Color</div>
            <div className='body'>
             {menuItem.map((item: ItemElementType) =>
-                <ShowHideVoxel key={item.id} id={item.id} name={item.name} isShow={item.isShow} onChange={handleOnChangeShow} onShow={handleShowModel} onRemove={handleRemoveModel} />)}
+                <ShowHideVoxel key={item.id} id={item.id} name={item.name} ratio={item.ratio} isShow={item.isShow} onChange={handleOnChangeShow} onShow={handleShowModel} onRemove={handleRemoveModel} />)}
         </div>
         </>
     );
