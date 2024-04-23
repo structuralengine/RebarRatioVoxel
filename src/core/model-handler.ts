@@ -1,12 +1,8 @@
 import * as THREE from "three";
 import { ModelLoader } from "./model-loader.ts";
-import { FragmentMesh } from "bim-fragment";
 import { VoxelModelData } from "./model-element.ts";
-import { BufferGeometry, MeshBasicMaterial } from "three";
+import { BufferGeometry } from "three";
 import { MeshBVH } from "three-mesh-bvh";
-import { CSG } from 'three-csg-ts';
-import { INTERSECTION, Brush, Evaluator, computeMeshVolume } from 'three-bvh-csg';
- 
 
 export const materialColorlist = [
     { color: '#00d4ff', label: '#00d4ff', ratio: '0%' },
@@ -15,6 +11,7 @@ export const materialColorlist = [
     { color: '#e8de09', label: '#e8de09', ratio: '35% - 50%' },
     { color: '#e80909', label: '#e80909', ratio: ' > 50%' }
 ]
+
 export class ModelHandler {
     private _modelLoader: ModelLoader
 
@@ -219,12 +216,18 @@ export class ModelHandler {
             }
 
             voxel.color = materialColorlist[indexColor].color;
+
+            // @ts-ignore
             hoverMesh.material.color.set(voxel.color);
             for (let item of voxel.reBarList) {
+
+                // @ts-ignore
                 const itemMesh = (item as THREE.Mesh).material.clone();
                 itemMesh.color.set(voxel.color);
 
                 item.material = itemMesh;
+
+                // @ts-ignore
                 item.material.needsUpdate = true;
             }
         });
