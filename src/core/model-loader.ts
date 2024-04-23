@@ -8,32 +8,28 @@ import { IFCBUILDINGELEMENTPROXY, IFCREINFORCINGBAR } from "web-ifc";
 import { ModelElement } from "./model-element.ts";
 
 export const defaultVolume = 300;
-export const defaultGridSize = 0.5;
+export const defaultVoxelSize = 0.5;
 
 export class ModelSetting {
-    public gridSize: number;
     public boxSize: number;
     public boxRoundness: number;
     public transparent: number;
-    public minSizeLimit: number;
+    public sizeLimit: number;
 
     constructor() {
-        this.gridSize = defaultGridSize;
-        this.boxSize = defaultGridSize;
+        this.boxSize = defaultVoxelSize;
         this.boxRoundness = 0.01;
         this.transparent = 0.4
-        this.minSizeLimit = defaultGridSize;
+        this.sizeLimit = defaultVoxelSize;
     }
 
     setup(volume: number) {
         const newSize = this.calculateScale(volume);
-        this.gridSize = newSize;
         this.boxSize = newSize;
-        this.minSizeLimit = newSize;
+        this.sizeLimit = newSize + 1;
     }
 
     setupSetting(setting: any) {
-        this.gridSize = setting.gridSize
         this.boxSize = setting.boxSize
         this.boxRoundness = setting.boxRoundness
         this.transparent = setting.transparent

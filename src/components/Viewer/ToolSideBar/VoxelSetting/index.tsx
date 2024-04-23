@@ -3,7 +3,6 @@ import { ViewerContext } from "../../../../contexts";
 import { ModelHandler } from '../../../../core';
 
 export type DataSettingsProps = {
-    gridSize: number,
     boxSize: number,
     boxRoundness: number,
     transparent: number,
@@ -12,41 +11,31 @@ export type DataSettingsProps = {
 const VoxelSetting = () => {
     const { modelLoader ,setLoaded } = useContext(ViewerContext)
     const [data, setData] = useState<DataSettingsProps>({
-        gridSize: 0,
         boxSize: 0,
         boxRoundness: 0,
         transparent: 0
     })
-    const [minGrid, setMinGrid] = useState<number>(0.1)
+    const [sizeLimit, setsizeLimit] = useState<number>(0.1)
 
     useEffect(() => {
         if (modelLoader) {
             setData({
-                gridSize: modelLoader?.getSetting().gridSize,
                 boxSize: modelLoader?.getSetting().boxSize,
                 boxRoundness: modelLoader?.getSetting().boxRoundness,
                 transparent: modelLoader?.getSetting().transparent,
             })
-            setMinGrid(modelLoader?.getSetting().minSizeLimit)
+            setsizeLimit(modelLoader?.getSetting().sizeLimit)
         }
     }, [modelLoader])
 
     const UiSettings = useMemo(() => [
         {
-            id: 'gridSize',
-            name: 'Grid size',
-            step: 0.1,
-            value: data.gridSize,
-            min: minGrid,
-            max: minGrid * 10,
-        },
-        {
             id: 'boxSize',
             name: 'Voxel size',
             step: 0.1,
-            value: data.boxSize > data.gridSize ? data.gridSize : (data.boxSize < parseFloat((data.gridSize / 10).toFixed(1)) && data.gridSize >= 1) ? (data.gridSize / 10).toFixed(1) : data.boxSize,
-            min: data.gridSize >= 1 ? (data.gridSize / 10).toFixed(1) : 0.1,
-            max: data.gridSize,
+            value: data.boxSize,
+            min: 0.1,
+            max: sizeLimit,
         },
         {
             id: 'boxRoundness',
@@ -67,22 +56,9 @@ const VoxelSetting = () => {
     ], [data, modelLoader])
 
     const handleChangeSetting = (value: string, type: string) => {
-        let postData = {
+        const postData = {
             ...data,
             [type]: parseFloat(value)
-        }
-        if (type === 'gridSize') {
-            if (data.boxSize > parseFloat(value)) {
-                postData = {
-                    ...postData,
-                    boxSize: parseFloat(value)
-                }
-            } else if ((data.boxSize < parseFloat((parseFloat(value) / 10).toFixed(1))) && parseFloat(value) >= 1) {
-                postData = {
-                    ...postData,
-                    boxSize: parseFloat((parseFloat(value) / 10).toFixed(1))
-                }
-            }
         }
 
         setData(postData)
@@ -92,12 +68,11 @@ const VoxelSetting = () => {
     const handleApplySetting = useCallback(async () => {
         setLoaded(false)
         setTimeout(() => {
-            if(data.gridSize !== modelLoader?.getSetting().gridSize) {
+            if(data.boxSize !== modelLoader?.getSetting().boxSize) {
                 modelLoader?.settings.setupSetting(data)
                 modelLoader?.reSetupLoadModel()
             } 
-            if(data.boxSize !== modelLoader?.getSetting().boxSize 
-                || data.boxRoundness !== modelLoader?.getSetting().boxRoundness
+            if(data.boxRoundness !== modelLoader?.getSetting().boxRoundness
                 || data.transparent !== modelLoader?.getSetting().transparent) {
                     modelLoader?.settings.setupSetting(data)
                     modelLoader?.reRenderVoxel(data.boxSize, data.boxRoundness, data.transparent)

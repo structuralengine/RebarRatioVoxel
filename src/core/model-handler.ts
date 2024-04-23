@@ -60,9 +60,8 @@ export class ModelHandler {
             }
         });
 
-        const gridSize = this._modelLoader.settings.gridSize;
         const boxSize = this._modelLoader.settings.boxSize;
-        console.log(gridSize, boxSize)
+        console.log(boxSize)
         // const gridSize = 0.18;
         // const boxSize = 0.18;
 
@@ -75,22 +74,22 @@ export class ModelHandler {
         const minY = boundingBoxOfConcrete.min.y
         const minZ = boundingBoxOfConcrete.min.z
 
-        const maxX = 1 + ((boundingBoxOfConcrete.max.x - minX) / gridSize)
-        const maxY = 1 + ((boundingBoxOfConcrete.max.y - minY) / gridSize)
-        const maxZ = 1 + ((boundingBoxOfConcrete.max.z - minZ) / gridSize)
+        const maxX = 1 + ((boundingBoxOfConcrete.max.x - minX) / boxSize)
+        const maxY = 1 + ((boundingBoxOfConcrete.max.y - minY) / boxSize)
+        const maxZ = 1 + ((boundingBoxOfConcrete.max.z - minZ) / boxSize)
 
         // New algorithm
         for (let i = 0; i < maxX; i++) {
             for (let j = 0; j < maxY; j++) {
                 for (let k = 0; k < maxZ; k++) {
-                    const x = minX + gridSize * i;
-                    const y = minY + gridSize * j;
-                    const z = minZ + gridSize * k;
+                    const x = minX + boxSize * i;
+                    const y = minY + boxSize * j;
+                    const z = minZ + boxSize * k;
                     const centerPoint = new THREE.Vector3(x, y, z);
 
                     const box = new THREE.Box3()
-                    box.min.setScalar(-gridSize / 2).add(centerPoint);
-                    box.max.setScalar(gridSize / 2).add(centerPoint);
+                    box.min.setScalar(-boxSize / 2).add(centerPoint);
+                    box.max.setScalar(boxSize / 2).add(centerPoint);
 
                     if (this.checkCollisionByBVH(centerPoint, box, concreteMesh.matrixWorld, concreteMesh.geometry)) {
                         modelElement.voxelModelData.push(new VoxelModelData(centerPoint, boxSize, boxRoundness, transparent));
