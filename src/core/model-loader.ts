@@ -153,7 +153,7 @@ export class ModelLoader extends CommonLoader {
                         } else {
                             this._handle.renderVoxelModel()
                         }
-                        this._handle.detectRebarAndVoxel();
+                        // this._handle.detectRebarAndVoxel();
                     }
                     this._visibleVoxel = !this._visibleVoxel
                 }, 100)
