@@ -106,7 +106,6 @@ export class ModelLoader extends CommonLoader {
 
     public async reSetupLoadModel() {
         await this._handle.reSetupVoxel()
-        this._handle.detectRebarAndVoxel()
     }
 
     public async reRenderVoxel(boxSize: number, boxRoundness: number, transparent: number) {

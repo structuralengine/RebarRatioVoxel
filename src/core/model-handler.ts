@@ -5,12 +5,13 @@ import { BufferGeometry } from "three";
 import { MeshBVH } from "three-mesh-bvh";
 
 export const materialColorlist = [
-    { color: '#00d4ff', label: '#00d4ff', ratio: '0%' },
-    { color: '#09e8cd', label: '#09e8cd', ratio: '0% - 15%' },
-    { color: '#09e810', label: '#09e810', ratio: '15% - 25%' },
-    { color: '#e8de09', label: '#e8de09', ratio: '35% - 50%' },
-    { color: '#e80909', label: '#e80909', ratio: ' > 50%' }
+    { color: '#00d4ff', label: '#00d4ff', ratio: '0%', quantity : 0 },
+    { color: '#09e8cd', label: '#09e8cd', ratio: '0% - 15%', quantity : 0 },
+    { color: '#09e810', label: '#09e810', ratio: '15% - 25%', quantity : 0 },
+    { color: '#e8de09', label: '#e8de09', ratio: '25% - 50%', quantity : 0 },
+    { color: '#e80909', label: '#e80909', ratio: ' > 50%', quantity : 0 }
 ]
+
 
 export class ModelHandler {
     private _modelLoader: ModelLoader
@@ -97,7 +98,7 @@ export class ModelHandler {
                 }
             }
         }
-
+        this.detectRebarAndVoxel();
         console.log('Voxel data length: ', modelElement.voxelModelData.length)
     }
 
@@ -153,6 +154,7 @@ export class ModelHandler {
     }
 
     public detectRebarAndVoxel() {
+        materialColorlist.map(item => item.quantity = 0)
         this._modelLoader?.getScene()?.get().updateMatrixWorld()
 
         const rebar = this._modelLoader.getElement().reinforcingBarMesh;
@@ -162,8 +164,9 @@ export class ModelHandler {
                 child.material.side = THREE.DoubleSide;
             }
         });
+    
+        const gridSize = this._modelLoader.getSetting().boxSize / 8
 
-        const gridSize = 0.05
         this._modelLoader.getElement().voxelModelData.forEach((voxel: VoxelModelData) => {
             voxel.reBarList = []
             const minX = voxel.center.x - voxel.boxSize / 2;
@@ -204,7 +207,7 @@ export class ModelHandler {
                 indexColor = 1;
             } else if (ratio >= 15 && ratio < 25) {
                 indexColor = 2;
-            } else if (ratio >= 35 && ratio < 50) {
+            } else if (ratio >= 25 && ratio < 50) {
                 indexColor = 3;
             } else if (ratio >= 50) {
                 indexColor = 4;
@@ -214,6 +217,7 @@ export class ModelHandler {
                 indexColor = materialColorlist.length - 1;
             }
 
+            materialColorlist[indexColor].quantity++
             voxel.color = materialColorlist[indexColor].color;
 
             // @ts-ignore

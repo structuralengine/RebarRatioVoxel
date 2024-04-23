@@ -10,12 +10,14 @@ const items: ItemElementType[] = [
         id: 'all',
         name: 'All',
         ratio: '',
+        quantity: 0,
         isShow: false
     },
     ...materialColorlist.map((color) => ({
         id: color.color,
         name: color.label,
         ratio: color.ratio,
+        quantity: color.quantity,
         isShow: false
     }))
 ]
@@ -27,7 +29,26 @@ const ShowHideVoxelElement = () => {
 
     useEffect(() => {
         if (loaded) {
-            const menuItem = items.map((item: ItemElementType) => ({ ...item, isShow: true }))
+            const colorQuantity : {[key : string] : number} = {}
+            materialColorlist.forEach((color) => {
+                colorQuantity[color.color] = color.quantity;
+            });
+            const menuItem = items.map((item: ItemElementType) => {
+                if (item.id === 'all') {
+                    return {
+                        ...item,
+                        isShow: true,
+                        quantity: Object.values(colorQuantity).reduce((acc, curr) => acc + curr, 0)
+                    };
+                }
+    
+                return {
+                    ...item,
+                    isShow: true,
+                    quantity: colorQuantity[item.id] || 0
+                };
+            });
+
             setMenuItem(menuItem)
         } else {
             const menuItem = items.map((item: ItemElementType) => ({ ...item, isShow: false }))
@@ -75,7 +96,7 @@ const ShowHideVoxelElement = () => {
         <div className='header'>Show/Hide Voxel by Color</div>
            <div className='body'>
             {menuItem.map((item: ItemElementType) =>
-                <ShowHideVoxel key={item.id} id={item.id} name={item.name} ratio={item.ratio} isShow={item.isShow} onChange={handleOnChangeShow} onShow={handleShowModel} onRemove={handleRemoveModel} />)}
+                <ShowHideVoxel key={item.id} id={item.id} name={item.name} ratio={item.ratio} quantity={item.quantity} isShow={item.isShow} onChange={handleOnChangeShow} onShow={handleShowModel} onRemove={handleRemoveModel} />)}
         </div>
         </>
     );
