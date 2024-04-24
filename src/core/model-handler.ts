@@ -117,7 +117,6 @@ export class ModelHandler {
         if (res) {
             return true;
         } else {
-            const maxDistance = box.min.distanceTo(box.max) / 2;
             const rayX = new THREE.Ray();
             rayX.direction.set(1, 0, 0);
     
@@ -137,10 +136,9 @@ export class ModelHandler {
             const resZ = bvh.raycastFirst(rayZ, THREE.DoubleSide);
 
             if (
-                (resX && resX.face && resX.face.normal.dot(rayX.direction) > 0 && resX.distance <= maxDistance)
-                || (resY && resY.face && resY.face.normal.dot(rayY.direction) > 0 && resY.distance <= maxDistance )
-                || (resZ && resZ.face && resZ.face.normal.dot(rayZ.direction) > 0 && resZ.distance <= maxDistance)
-
+                (resX && resX.face && resX.face.normal.dot(rayX.direction) > 0)
+                || (resY && resY.face && resY.face.normal.dot(rayY.direction) > 0)
+                || (resZ && resZ.face && resZ.face.normal.dot(rayZ.direction) > 0)
             ) {
                 return true;
             }
