@@ -137,8 +137,49 @@ export class ModelHandler {
 
             if (
                 (resX && resX.face && resX.face.normal.dot(rayX.direction) > 0)
-                || (resY && resY.face && resY.face.normal.dot(rayY.direction) > 0)
-                || (resZ && resZ.face && resZ.face.normal.dot(rayZ.direction) > 0)
+                || (resY && resY.face  &&  resY.face.normal.dot(rayY.direction) > 0)
+                || (resZ && resZ.face  && resZ.face.normal.dot(rayZ.direction) > 0)
+            ) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    // New algorithm check collision
+    private checkCollisionRebarByBVH(center: THREE.Vector3, box: THREE.Box3, matrixWorld: THREE.Matrix4, geometry: BufferGeometry) {
+        const invMat = new THREE.Matrix4().copy(matrixWorld.clone()).invert();
+
+        // @ts-ignore
+        const bvh = geometry.boundsTree as MeshBVH;
+        const res = bvh.intersectsBox(box, invMat);
+
+        if (res) {
+            return true;
+        } else {
+            const rayX = new THREE.Ray();
+            rayX.direction.set(1, 0, 0);
+    
+            const rayY = new THREE.Ray();
+            rayY.direction.set(0, 1, 0);
+    
+            const rayZ = new THREE.Ray();
+            rayZ.direction.set(0, 0, 1);
+
+            rayX.origin.copy(center).applyMatrix4(invMat);
+            const resX = bvh.raycastFirst(rayX, THREE.DoubleSide);
+            
+            rayY.origin.copy(center).applyMatrix4(invMat);
+            const resY = bvh.raycastFirst(rayY, THREE.DoubleSide);
+
+            rayZ.origin.copy(center).applyMatrix4(invMat);
+            const resZ = bvh.raycastFirst(rayZ, THREE.DoubleSide);
+
+            if (
+                (resX && resX.face && resX.faceIndex == 1 && resX.face.normal.dot(rayX.direction) > 0)
+                || (resY && resY.face  &&  resY.faceIndex == 1 && resY.face.normal.dot(rayY.direction) > 0)
+                || (resZ && resZ.face  && resZ.faceIndex == 1 && resZ.face.normal.dot(rayZ.direction) > 0)
             ) {
                 return true;
             }
@@ -167,17 +208,16 @@ export class ModelHandler {
         const maxZ = voxel.center.z + voxel.boxSize / 2;
 
         let count = 0;
-
         for (let x = minX; x <= maxX; x += gridSize) {
             for (let y = minY; y < maxY; y += gridSize) {
                 for (let z = minZ; z < maxZ; z += gridSize) {
-                    const centerPoint = new THREE.Vector3(x, y, z);
+                    const centerPoint = new THREE.Vector3(x + gridSize / 2 , y + gridSize / 2, z + gridSize / 2);
 
                     const box = new THREE.Box3()
                     box.min.setScalar(-gridSize / 2).add(centerPoint);
                     box.max.setScalar(gridSize / 2).add(centerPoint);
 
-                    if (this.checkCollisionByBVH(centerPoint, box, rebar.matrixWorld, rebar.geometry)) {
+                    if (this.checkCollisionRebarByBVH(centerPoint, box, rebar.matrixWorld, rebar.geometry)) {
                         count++;
                     }
                 }
