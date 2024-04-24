@@ -74,6 +74,15 @@ export class ModelHandler {
 
         materialColorlist.map(item => item.quantity = 0)
 
+        this._modelLoader?.getScene()?.get().updateMatrixWorld()
+        const rebar = this._modelLoader.getElement().reinforcingBarMesh;
+        if (!rebar) return;
+        rebar.traverse((child: any) => {
+            if (child instanceof THREE.Mesh) {
+                child.material.side = THREE.DoubleSide;
+            }
+        });
+
         // New algorithm
         for (let i = 0; i < maxX; i++) {
             for (let j = 0; j < maxY; j++) {
@@ -89,7 +98,7 @@ export class ModelHandler {
 
                     if (this.checkCollisionByBVH(centerPoint, box, concreteMesh.matrixWorld, concreteMesh.geometry)) {
                         const newVoxel = new VoxelModelData(centerPoint, boxSize, boxRoundness, transparent)
-                        this.detectRebarAndVoxel(newVoxel)
+                        this.detectRebarAndVoxel(newVoxel, rebar)
                         modelElement.voxelModelData.push(newVoxel);
                     }
                 }
@@ -108,6 +117,7 @@ export class ModelHandler {
         if (res) {
             return true;
         } else {
+            const maxDistance = box.min.distanceTo(box.max) / 2;
             const rayX = new THREE.Ray();
             rayX.direction.set(1, 0, 0);
     
@@ -125,10 +135,11 @@ export class ModelHandler {
 
             rayZ.origin.copy(center).applyMatrix4(invMat);
             const resZ = bvh.raycastFirst(rayZ, THREE.DoubleSide);
+
             if (
-                resX && resX.face && resX.face.normal.dot(rayX.direction) > 0 ||
-                resY && resY.face && resY.face.normal.dot(rayY.direction) > 0 ||
-                resZ && resZ.face && resZ.face.normal.dot(rayZ.direction) > 0
+                (resX && resX.face && resX.face.normal.dot(rayX.direction) > 0 && resX.distance <= maxDistance)
+                || (resY && resY.face && resY.face.normal.dot(rayY.direction) > 0 && resY.distance <= maxDistance )
+                || (resZ && resZ.face && resZ.face.normal.dot(rayZ.direction) > 0 && resZ.distance <= maxDistance)
 
             ) {
                 return true;
@@ -148,19 +159,7 @@ export class ModelHandler {
         })
     }
 
-    public detectRebarAndVoxel(voxel: VoxelModelData) {
-        this._modelLoader?.getScene()?.get().updateMatrixWorld()
-
-        const rebar = this._modelLoader.getElement().reinforcingBarMesh;
-        if (!rebar) return;
-        rebar.traverse((child: any) => {
-            if (child instanceof THREE.Mesh) {
-                child.material.side = THREE.DoubleSide;
-            }
-        });
-
-        const gridSize = 0.05
-
+    public detectRebarAndVoxel(voxel: VoxelModelData, rebar: THREE.Mesh, gridSize: number = 0.05) {
         const minX = voxel.center.x - voxel.boxSize / 2;
         const minY = voxel.center.y - voxel.boxSize / 2;
         const minZ = voxel.center.z - voxel.boxSize / 2;
@@ -183,7 +182,6 @@ export class ModelHandler {
                     if (this.checkCollisionByBVH(centerPoint, box, rebar.matrixWorld, rebar.geometry)) {
                         count++;
                     }
-
                 }
             }
         }
