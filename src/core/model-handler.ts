@@ -211,5 +211,4 @@ export class ModelHandler {
         // @ts-ignore
         hoverMesh.material.color.set(voxel.color);
     }
-
 }

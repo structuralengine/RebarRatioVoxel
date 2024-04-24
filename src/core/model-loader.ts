@@ -5,7 +5,7 @@ import { Fragment, FragmentMesh } from "bim-fragment";
 import { CommonLoader } from "./common-loader.ts";
 import { ModelHandler } from "./model-handler.ts";
 import { IFCBUILDINGELEMENTPROXY, IFCREINFORCINGBAR } from "web-ifc";
-import { ModelElement } from "./model-element.ts";
+import {ModelElement, VoxelModelData} from "./model-element.ts";
 
 export const defaultVolume = 300;
 export const defaultVoxelSize = 0.5;
@@ -149,6 +149,7 @@ export class ModelLoader extends CommonLoader {
                     if (this._visibleVoxel) {
                         this._callBack(this._visibleVoxel, true)
                         if (this._elements.voxelModelData.length === 0) {
+                            this.testSelectVoxel();
                             this._handle.voxelizeModel();
                         } else {
                             this._handle.renderVoxelModel()
@@ -441,5 +442,79 @@ export class ModelLoader extends CommonLoader {
                 scene.remove(voxel.mesh);
             });
         }
+    }
+
+    private testSelectVoxel() {
+        const mouse = new THREE.Vector2();
+        let hoverMesh : THREE.Mesh | null = null;
+
+        const camera = this._camera?.get()
+        const scene = this._scene?.get()
+
+        // window.addEventListener('mousemove', (event) => {
+        //     if (!camera || !scene) return
+        //     mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+        //     mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
+        //
+        //     const vector = new THREE.Vector3( mouse.x, mouse.y, 1 );
+        //     const data = vector.unproject(camera );
+        //     const ray = new THREE.Raycaster( camera.position, data.sub( camera.position ).normalize() );
+        //     const intersects = ray.intersectObjects(scene.children);
+        //
+        //     let result : THREE.Mesh | null = null;
+        //     for ( let i = 0; i < intersects.length; i++ )
+        //     {
+        //         if ( (!result) && (intersects[i].object instanceof THREE.Mesh) && intersects[i].object) {
+        //             result = intersects[i].object as THREE.Mesh;
+        //             break
+        //         }
+        //         result = null;
+        //     }
+        //
+        //     if (result) {
+        //         if (result !== hoverMesh) {
+        //             // Nếu mesh khác với mesh được hover trước đó
+        //             if (hoverMesh) {
+        //                 // Reset màu sắc của mesh trước đó nếu có
+        //                 hoverMesh.material.color.set(0xffffff); // Màu mặc định
+        //             }
+        //             // Gán mesh mới là mesh được hover và thực hiện các thay đổi
+        //             hoverMesh = result;
+        //             hoverMesh.material.color.set(0xff0000); // Màu đỏ khi hover
+        //         }
+        //     }else {
+        //         // Nếu không có mesh nào gần chuột, reset hoverMesh và thực hiện các thay đổi tương ứng
+        //         if (hoverMesh) {
+        //             hoverMesh.material.color.set(0xffffff); // Màu mặc định
+        //             hoverMesh = null;
+        //         }
+        //     }
+        // });
+
+        window.addEventListener('mousedown', (event) => {
+            if (!camera || !scene) return
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
+
+            const vector = new THREE.Vector3( mouse.x, mouse.y, 1 );
+            const data = vector.unproject(camera );
+            const ray = new THREE.Raycaster( camera.position, data.sub( camera.position ).normalize() );
+            const intersects = ray.intersectObjects(scene.children);
+
+            let result : THREE.Mesh | null = null;
+            for ( let i = 0; i < intersects.length; i++ )
+            {
+                if ( (!result) && (intersects[i].object instanceof THREE.Mesh) && intersects[i].object) {
+                    result = intersects[i].object as THREE.Mesh;
+                    break
+                }
+                result = null;
+            }
+
+            if (result) {
+                const index = this._elements.voxelModelData.findIndex((voxel: VoxelModelData) => voxel.mesh.id === result?.parent?.id)
+                console.log('voxel choose index: ', index, result )
+            }
+        });
     }
 }
