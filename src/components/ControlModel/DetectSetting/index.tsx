@@ -1,32 +1,17 @@
 import { useEffect, useState } from "react";
 import Ranger from "./Components/Ranger";
 
-// export const defaultColor = [
-//   '#52d726',
-//   '#ffaf00',
-//   '#ff7300',
-//   '#dd1b79',
-//   '#c758d0',
-//   '#9b46ce',
-//   '#8d6cef',
-//   '#8399ec',
-//   '#007ed7',
-//   // '#7bdddc',
-//   '#dd1b1b',
-// ]
-
 export const defaultColor = [
-  '#1700e9',
-  '#2e00d2',
-  '#4400b7',
-  '#5801a4',
-  '#70018c',
-  '#92006c',
-  '#a70157',
-  '#bf0040',
-  '#de0122',
-  // '#7bdddc',
-  '#f4000a',
+  '#0500fa',
+  '#2302d9',
+  '#3c00c4',
+  '#4f00b0',
+  '#6b0091',
+  '#85007a',
+  '#9f005c',
+  '#b80144',
+  '#cf002a',
+  '#ea0315',
 ]
 
 const DetectSetting = ({ dataDetect, callBack, isSetting }) => {
