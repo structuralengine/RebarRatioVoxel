@@ -7,7 +7,7 @@ const ControlModel = ({ isShow }) => {
     const [dataDetect, setDataDetact] = useState('')
     const [postData, setPostData] = useState([])
 
-    const { modelLoader, isSetting, setIsSetting, setLoaded } = useContext(ViewerContext)
+    const { modelLoader, isSetting, setIsSetting, setLoaded, setIsModaling } = useContext(ViewerContext)
 
     useEffect(() => {
         if(isSetting){
@@ -22,6 +22,7 @@ const ControlModel = ({ isShow }) => {
     const handlePostData = () => {
         setIsSetting(false)
         setLoaded(false)
+        setIsModaling(true)
         setTimeout(() => {
             localStorage.setItem('materialColorList', JSON.stringify(postData))
             const rebarMesh = modelLoader?.getElement().reinforcingBarMesh

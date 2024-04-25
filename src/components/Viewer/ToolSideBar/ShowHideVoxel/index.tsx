@@ -49,8 +49,6 @@ const ShowHideVoxelElement = () => {
                     quantity: colorQuantity[item.id] || 0
                 };
             });
-
-            console.log('----', menuItem)
             setMenuItem(menuItem)
         } else {
             const menuItem = items.map((item: ItemElementType) => ({ ...item, isShow: false }))
@@ -122,7 +120,7 @@ const ShowHideVoxelElement = () => {
                 <div className="button-setting">
                     <button className="button" disabled={materialColorList.length == 0} onClick={() => handleDetectRebar()}>Detect</button>
                     <button type="button" className="button" onClick={() => setIsSetting(true)}>
-                        Modal
+                        Config
                     </button>
                 </div>
             </div>

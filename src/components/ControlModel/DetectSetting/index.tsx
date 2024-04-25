@@ -95,7 +95,8 @@ const DetectSetting = ({ dataDetect, callBack, isSetting }) => {
         <div>number of range</div>:
         <select className="form-select"
                 onChange={(e) => handleNumberRange(Number(e.target.value))}
-                value={numberRange}>
+                value={numberRange}
+        >
           {defaultColor.map((_, index) => {
             if (index === 0) {
               return (
