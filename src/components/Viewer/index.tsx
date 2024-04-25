@@ -6,20 +6,21 @@ import ModelLoading from "./ModelLoading.tsx";
 import { ViewerContext } from "../../contexts";
 import UiControl from "./UiControl.tsx";
 import { IFCBUILDINGELEMENTPROXY } from "web-ifc";
-import { DataSettingsProps } from "./ToolSideBar/VoxelSetting/index.tsx";
 import ControlModel from "../ControlModel/index.tsx";
+
 const Viewer = () => {
     const viewerRef = useRef<HTMLDivElement | null>(null)
     const [loaded, setLoaded] = useState<boolean | undefined>(undefined)
-    const [isSetting, setIsSetting] = useState<DataSettingsProps | undefined>(undefined)
+    const [isSetting, setIsSetting] = useState<boolean | undefined>(undefined)
     const [modelLoader, setModelLoader] = useState<ModelLoader | undefined>(undefined);
     const [voxelized, setVoxelized] = useState<boolean | undefined>(undefined)
-    const [isModaling, setIsModaling] = useState<boolean>(false)
+    const [isModaling, setIsModaling] = useState<boolean | undefined>(false)
 
     useEffect(() => {
         return () => {
             cleanUpViewer().then(() => setLoaded(undefined))
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     useEffect(() => {
@@ -51,6 +52,7 @@ const Viewer = () => {
                 alert('Error load model IFC. Please try again!')
             }
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     const cleanUpViewer = useCallback(async () => {

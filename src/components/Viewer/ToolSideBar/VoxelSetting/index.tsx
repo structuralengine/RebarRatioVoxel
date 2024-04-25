@@ -1,6 +1,5 @@
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { ViewerContext } from "../../../../contexts";
-import { ModelHandler } from '../../../../core';
 
 export type DataSettingsProps = {
     boxSize: number,
@@ -53,6 +52,8 @@ const VoxelSetting = () => {
             min: 0.1,
             max: 1,
         },
+
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     ], [data, modelLoader])
 
     const handleChangeSetting = (value: string, type: string) => {
@@ -80,6 +81,8 @@ const VoxelSetting = () => {
             }
             setLoaded(true)
         }, 100)
+
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [data])
 
     return (

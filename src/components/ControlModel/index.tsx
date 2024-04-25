@@ -1,11 +1,27 @@
-import { useContext, useState, useCallback, useEffect} from "react"
+import { useContext, useState, useEffect} from "react"
 import { ViewerContext } from "../../contexts"
 import DetectSetting from "./DetectSetting"
 
-const ControlModel = ({ isShow }) => {
+type ControlModelProps = {
+    isShow: boolean | undefined
+}
+
+export type DataDetectItemProps = {
+    color: string,
+    label: string,
+    ratio: {
+        min: number,
+        max: number,
+    },
+    quantity?: number,
+}
+
+export type DataDetectProps = [DataDetectItemProps] | []
+
+const ControlModel :React.FC<ControlModelProps> = ({ isShow }) => {
     const dataDetectLocal = JSON.parse(localStorage.getItem('materialColorList') as string)
-    const [dataDetect, setDataDetact] = useState('')
-    const [postData, setPostData] = useState([])
+    const [dataDetect, setDataDetact] = useState<DataDetectProps | undefined>(undefined)
+    const [postData, setPostData] = useState<DataDetectItemProps[] | undefined>(undefined)
 
     const { modelLoader, isSetting, setIsSetting, setLoaded, setIsModaling } = useContext(ViewerContext)
 
@@ -13,6 +29,7 @@ const ControlModel = ({ isShow }) => {
         if(isSetting){
             setDataDetact(dataDetectLocal)
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isSetting])
 
 
@@ -46,7 +63,7 @@ const ControlModel = ({ isShow }) => {
                         <button type="button" className="btn-close" onClick={() => setIsSetting(false)}></button>
                     </div>
                     <div className="modal-body">
-                        <DetectSetting dataDetect={dataDetect} callBack={(value) => setPostData(value)} isSetting={isSetting} />
+                        <DetectSetting dataDetect={dataDetect} callBack={(value: DataDetectItemProps[] | undefined) => setPostData(value)} isSetting={isSetting} />
                     </div>
                     <div className="modal-footer">
                         <button type="button" className="btn btn-secondary" onClick={() => setIsSetting(false)}>Close</button>

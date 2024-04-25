@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import Ranger from "./Components/Ranger";
+import { DataDetectItemProps, DataDetectProps } from "..";
 
-export const defaultColor = [
+const defaultColor: string[] = [
   '#0500fa',
   '#2302d9',
   '#3c00c4',
@@ -14,30 +15,34 @@ export const defaultColor = [
   '#ea0315',
 ]
 
-const DetectSetting = ({ dataDetect, callBack, isSetting }) => {
+type DetectSettingProps = {
+  dataDetect: DataDetectProps | undefined,
+  callBack: (value: DataDetectItemProps[] | undefined) => void,
+  isSetting: boolean | undefined
+}
+
+const DetectSetting :React.FC<DetectSettingProps> = ({ dataDetect, callBack, isSetting }) => {
   const [listPoint, setListPoint] = useState<number[]>([])
-  const [listColor, setListColor] = useState([])
+  const [listColor, setListColor] = useState<string[]>([])
   const [numberRange, setNumberRange] = useState<number>(0)
 
   useEffect(() => {
-    // debugger
-    const listLastPoint: any = []
+    const listLastPoint: number[] = []
     if (dataDetect && isSetting) {
-      dataDetect.forEach((item: any) => {
+      dataDetect.forEach((item) => {
         if (item.ratio.max !== 100)
           listLastPoint.push(item.ratio.max)
       })
       setNumberRange(listLastPoint.length + 1)
       setListPoint(listLastPoint)
-      setListColor(dataDetect.map((item: any) => item.color))
+      setListColor(dataDetect?.map((item) => item.color))
     }
   }, [dataDetect, isSetting])
 
   useEffect(() => {
-    const postData: any = []
+    const postData: DataDetectItemProps[] = []
     const newList = [...listPoint]
     newList.push(100)
-    console.log('new list', listPoint)
     newList.forEach((item, index) => {
       if (index === 0) {
         postData.push({
@@ -62,11 +67,13 @@ const DetectSetting = ({ dataDetect, callBack, isSetting }) => {
     })
 
     callBack(postData)
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [listPoint])
 
   const handleNumberRange = (value: number) => {
     const listLastPoint: number[] = []
-    const listLastColor: any = []
+    const listLastColor: string[] = []
     const range = value
     if (range > 0) {
       for (let i = 1; i <= range; i++) {

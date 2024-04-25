@@ -1,6 +1,5 @@
 import '../../../styles/Viewer.css'
 import VoxelizeButton from "./VoxelizeButton.tsx";
-import CloseModelButton from "./CloseModelButton.tsx";
 import ElementShow from "./ElementShow";
 import VoxelSetting from "./VoxelSetting";
 import ShowHideVoxelElement from './ShowHideVoxel';
@@ -21,7 +20,6 @@ const ToolSideBar = ({ isShow }: ToolSideBarProps) => {
     return (
         <div className='tool-sidebar'>
             <VoxelizeButton onVoxelButtonClick={handleVoxelButtonClick} />
-            <CloseModelButton />
             <ElementShow />
             <VoxelSetting />
             {showVoxelElement && <ShowHideVoxelElement />}

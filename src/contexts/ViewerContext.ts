@@ -26,7 +26,7 @@ export interface ViewerContextProps {
     voxelized?: boolean,
     setVoxelized: (value?: boolean) => void,
     isSetting?: boolean,
-    setIsSetting: (value?: boolean) => void,
+    setIsSetting: (value?: boolean | undefined) => void,
     isModaling?: boolean,
-    setIsModaling: (value?: any) => void,
+    setIsModaling: (value?: boolean) => void,
 }

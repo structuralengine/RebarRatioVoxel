@@ -1,7 +1,22 @@
 import { useEffect, useState } from "react";
 import { useRanger } from "react-ranger";
 import styled from "styled-components";
-import {b} from "vite/dist/node/types.d-aGj9QkWt";
+
+type RangerProps = {
+    listColor: string[],
+    listPoint: number[],
+    setListPoint: (value: number[]) => void
+}
+
+type SegmentProps = {
+    listColor: string[];
+    index: number
+}
+
+type HandelProps = {
+    children: number;
+    active: boolean
+}
 
 export const Track = styled("div")`
   display: inline-block;
@@ -31,12 +46,12 @@ export const TickLabel = styled("div")`
   white-space: nowrap;
 `;
 
-export const Segment = styled("div")`
+export const Segment:React.FC<SegmentProps>  = styled("div")`
   background: ${props => props.listColor[props.index]};
   height: 100%;
 `;
 
-export const Handle = styled("div")`
+export const Handle:React.FC<HandelProps> = styled("div")`
   background: #ff1a6b;
   display: flex;
   align-items: center;
@@ -53,7 +68,7 @@ export const Handle = styled("div")`
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 `;
 
-const Ranger = ({ listColor, listPoint, setListPoint }) => {
+const Ranger:React.FC<RangerProps> = ({ listColor, listPoint, setListPoint }) => {
     const [values, setValues] = useState<number[]>([]);
 
     useEffect(() => {
