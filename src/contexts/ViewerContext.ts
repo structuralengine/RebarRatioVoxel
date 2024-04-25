@@ -13,6 +13,8 @@ export const ViewerContext =
             setVoxelized: () => { },
             isSetting: undefined,
             setIsSetting: () => {},
+            isModaling: undefined,
+            setIsModaling: () => {},
         });
 
 export interface ViewerContextProps {
@@ -25,4 +27,6 @@ export interface ViewerContextProps {
     setVoxelized: (value?: boolean) => void,
     isSetting?: boolean,
     setIsSetting: (value?: boolean) => void,
+    isModaling?: boolean,
+    setIsModaling: (value?: any) => void,
 }

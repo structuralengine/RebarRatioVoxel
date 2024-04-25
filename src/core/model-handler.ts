@@ -4,15 +4,6 @@ import { VoxelModelData } from "./model-element.ts";
 import { BufferGeometry } from "three";
 import { MeshBVH } from "three-mesh-bvh";
 
-export const materialColorlist = [
-    { color: '#00d4ff', label: '#00d4ff', ratio: '0%', quantity: 0 },
-    { color: '#09e8cd', label: '#09e8cd', ratio: '0% - 15%', quantity: 0 },
-    { color: '#09e810', label: '#09e810', ratio: '15% - 25%', quantity: 0 },
-    { color: '#e8de09', label: '#e8de09', ratio: '25% - 50%', quantity: 0 },
-    { color: '#e80909', label: '#e80909', ratio: ' > 50%', quantity: 0 }
-]
-
-
 export class ModelHandler {
     private _modelLoader: ModelLoader
 
@@ -72,7 +63,6 @@ export class ModelHandler {
         const maxY = 1 + ((boundingBoxOfConcrete.max.y - minY) / boxSize)
         const maxZ = 1 + ((boundingBoxOfConcrete.max.z - minZ) / boxSize)
 
-        materialColorlist.map(item => item.quantity = 0)
 
         this._modelLoader?.getScene()?.get().updateMatrixWorld()
         const rebar = this._modelLoader.getElement().reinforcingBarMesh;
@@ -98,12 +88,12 @@ export class ModelHandler {
 
                     if (this.checkCollisionByBVH(centerPoint, box, concreteMesh.matrixWorld, concreteMesh.geometry)) {
                         const newVoxel = new VoxelModelData(centerPoint, boxSize, boxRoundness, transparent)
-                        this.detectRebarAndVoxel(newVoxel, rebar)
                         modelElement.voxelModelData.push(newVoxel);
                     }
                 }
             }
         }
+        // this.detectRebarAndVoxel(rebar)
     }
 
     // New algorithm check collision
@@ -198,57 +188,76 @@ export class ModelHandler {
         })
     }
 
-    public detectRebarAndVoxel(voxel: VoxelModelData, rebar: THREE.Mesh, gridSize: number = 0.05) {
-        const minX = voxel.center.x - voxel.boxSize / 2;
-        const minY = voxel.center.y - voxel.boxSize / 2;
-        const minZ = voxel.center.z - voxel.boxSize / 2;
+    public detectRebarAndVoxel(rebar: THREE.Mesh, gridSize: number = 0.05) {
+        this._modelLoader.getElement().voxelModelData.forEach((voxel: VoxelModelData) => {
+            this._modelLoader.getScene()?.get().remove(voxel.mesh)
+        })
+        const materialColorList = localStorage.getItem('materialColorList')
+        let colorList = null
+        if (materialColorList !== null) {
+            colorList = JSON.parse(materialColorList)
+        }
+        colorList = colorList.map((color: any) => ({
+            ...color,
+            quantity: 0
+        }));
+        this._modelLoader.getElement().voxelModelData.forEach((voxel: VoxelModelData) => {
+            const minX = voxel.center.x - voxel.boxSize / 2;
+            const minY = voxel.center.y - voxel.boxSize / 2;
+            const minZ = voxel.center.z - voxel.boxSize / 2;
 
-        const maxX = voxel.center.x + voxel.boxSize / 2;
-        const maxY = voxel.center.y + voxel.boxSize / 2;
-        const maxZ = voxel.center.z + voxel.boxSize / 2;
+            const maxX = voxel.center.x + voxel.boxSize / 2;
+            const maxY = voxel.center.y + voxel.boxSize / 2;
+            const maxZ = voxel.center.z + voxel.boxSize / 2;
 
-        let count = 0;
-        for (let x = minX; x <= maxX; x += gridSize) {
-            for (let y = minY; y < maxY; y += gridSize) {
-                for (let z = minZ; z < maxZ; z += gridSize) {
-                    const centerPoint = new THREE.Vector3(x + gridSize / 2 , y + gridSize / 2, z + gridSize / 2);
+            let count = 0;
+            for (let x = minX; x <= maxX; x += gridSize) {
+                for (let y = minY; y < maxY; y += gridSize) {
+                    for (let z = minZ; z < maxZ; z += gridSize) {
+                        const centerPoint = new THREE.Vector3(x + gridSize / 2 , y + gridSize / 2, z + gridSize / 2);
 
-                    const box = new THREE.Box3()
-                    box.min.setScalar(-gridSize / 2).add(centerPoint);
-                    box.max.setScalar(gridSize / 2).add(centerPoint);
+                        const box = new THREE.Box3()
+                        box.min.setScalar(-gridSize / 2).add(centerPoint);
+                        box.max.setScalar(gridSize / 2).add(centerPoint);
 
-                    if (this.checkCollisionRebarByBVH(centerPoint, box, rebar.matrixWorld, rebar.geometry)) {
-                        count++;
+                        if (this.checkCollisionRebarByBVH(centerPoint, box, rebar.matrixWorld, rebar.geometry)) {
+                            count++;
+                        }
                     }
                 }
             }
-        }
 
-        const volumeOfMesh = count * (gridSize ** 3)
-        const voumeOfVoxel = voxel.boxSize ** 3;
+            const volumeOfMesh = count * (gridSize ** 3)
+            const voumeOfVoxel = voxel.boxSize ** 3;
 
-        const ratio = volumeOfMesh * 100 / voumeOfVoxel;
+            const ratio = volumeOfMesh * 100 / voumeOfVoxel;
 
-        const hoverMesh = voxel.mesh.children[1] as THREE.Mesh
-        let indexColor = 0;
-        if (ratio > 0 && ratio < 15) {
-            indexColor = 1;
-        } else if (ratio >= 15 && ratio < 25) {
-            indexColor = 2;
-        } else if (ratio >= 25 && ratio < 50) {
-            indexColor = 3;
-        } else if (ratio >= 50) {
-            indexColor = 4;
-        }
+            const hoverMesh = voxel.mesh.children[1] as THREE.Mesh
+        
+            let indexColor = 0;
+            let lastIndex = colorList.length - 1;
+            
+            for (let i = 1; i < lastIndex; i++) {
+                if (ratio > colorList[i].ratio.min && ratio <= colorList[i].ratio.max) {
+                    indexColor = i;
+                    break;
+                }
+            }
+        
+            if (ratio > colorList[lastIndex].ratio.max) {
+                indexColor = lastIndex;
+            }
 
-        if (indexColor >= materialColorlist.length) {
-            indexColor = materialColorlist.length - 1;
-        }
+            colorList[indexColor].quantity++
+            voxel.color = colorList[indexColor].color;
 
-        materialColorlist[indexColor].quantity++
-        voxel.color = materialColorlist[indexColor].color;
-
-        // @ts-ignore
-        hoverMesh.material.color.set(voxel.color);
+            // @ts-ignore
+            hoverMesh.material.color.set(voxel.color);
+        });
+        this._modelLoader.getElement().voxelModelData.forEach((voxel: VoxelModelData) => {
+            this._modelLoader.getScene()?.get().add(voxel.mesh)
+        })
+        localStorage.setItem('materialColorList', JSON.stringify(colorList))
     }
+    
 }

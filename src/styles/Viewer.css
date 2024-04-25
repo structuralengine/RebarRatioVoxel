@@ -148,6 +148,9 @@
 .ui-control .button-setting {
     text-align: right;
     margin-top: 10px;
+    gap: 5px;
+    display: flex;
+    flex-direction: row-reverse;
 }
 
 .button {

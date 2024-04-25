@@ -1,24 +1,25 @@
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Ranger from "./Components/Ranger";
-import { ViewerContext } from "../../../contexts";
 
 export const defaultColor = [
   '#52d726',
   '#ffaf00',
   '#ff7300',
-  '#7bdddc',
   '#dd1b79',
   '#c758d0',
   '#9b46ce',
   '#8d6cef',
   '#8399ec',
+  '#007ed7',
+  '#7bdddc',
+
   '#dd1b1b',
 ]
 
 const DetectSetting = ({ dataDetect, callBack, isSetting }) => {
-  const [listPoint, setListPoint] = useState([])
+  const [listPoint, setListPoint] = useState<number[]>([])
   const [listColor, setListColor] = useState([])
-  const [numberRange, setNumberRange] = useState<string>('0')
+  const [numberRange, setNumberRange] = useState<number>(0)
 
   useEffect(() => {
     // debugger
@@ -28,7 +29,7 @@ const DetectSetting = ({ dataDetect, callBack, isSetting }) => {
         if (item.ratio.max !== 100)
           listLastPoint.push(item.ratio.max)
       })
-      setNumberRange((listLastPoint.length + 1).toString())
+      setNumberRange(listLastPoint.length + 1)
       setListPoint(listLastPoint)
       setListColor(dataDetect.map((item: any) => item.color))
     }
@@ -37,8 +38,8 @@ const DetectSetting = ({ dataDetect, callBack, isSetting }) => {
   useEffect(() => {
     const postData: any = []
     const newList = [...listPoint]
-    newList.push('100')
-    console.log(newList)
+    newList.push(100)
+    console.log('new list', listPoint)
     newList.forEach((item, index) => {
       if (index === 0) {
         postData.push({
@@ -46,7 +47,7 @@ const DetectSetting = ({ dataDetect, callBack, isSetting }) => {
           label: `0% - ${item}%`,
           ratio: {
             min: 0,
-            max: parseInt(item)
+            max: item
           }
         })
       }
@@ -55,8 +56,8 @@ const DetectSetting = ({ dataDetect, callBack, isSetting }) => {
           color: index === newList.length - 1 ? listColor[listColor.length - 1] : listColor[index],
           label: `${listPoint[index - 1]}% - ${item}%`,
           ratio: {
-            min: parseInt(listPoint[index - 1]),
-            max: parseInt(item)
+            min: listPoint[index - 1],
+            max: item
           }
         })
       }
@@ -65,14 +66,14 @@ const DetectSetting = ({ dataDetect, callBack, isSetting }) => {
     callBack(postData)
   }, [listPoint])
 
-  const handleNumberRange = (value) => {
-    const listLastPoint: any = []
+  const handleNumberRange = (value: number) => {
+    const listLastPoint: number[] = []
     const listLastColor: any = []
-    const range = parseInt(value)
+    const range = value
     if (range > 0) {
       for (let i = 1; i <= range; i++) {
         if (range !== i)
-          listLastPoint.push((100 / range * i).toFixed(0))
+          listLastPoint.push(Number((100 / range * i).toFixed(0)))
         if (i === range) {
           listLastColor.push(defaultColor[defaultColor.length - 1])
         } else {
@@ -83,6 +84,8 @@ const DetectSetting = ({ dataDetect, callBack, isSetting }) => {
       setListPoint(listLastPoint)
       setListColor(listLastColor)
       setNumberRange(value)
+    } else {
+      setNumberRange(value)
     }
   }
 
@@ -90,21 +93,24 @@ const DetectSetting = ({ dataDetect, callBack, isSetting }) => {
     <div className="detect-setting">
       <div className="d-flex number-range">
         <div>number of range</div>:
-        <select className="form-select" aria-label="Default select example" onChange={(e) => handleNumberRange(e.target.value)} value={numberRange}>
+        <select className="form-select"
+                onChange={(e) => handleNumberRange(Number(e.target.value))}
+                value={numberRange}
+        >
           {defaultColor.map((_, index) => {
             if (index === 0) {
               return (
-                <option value={index}>select range option</option>
+                <option key={index} value={index}>select range option</option>
               )
             } else {
               return (
-                <option value={index + 1}>{index + 1}</option>
+                <option key={index} value={index + 1}>{index + 1}</option>
               )
             }
           })}
         </select>
       </div>
-      {parseInt(numberRange) > 0 && <Ranger listPoint={listPoint} listColor={listColor} setListPoint={setListPoint} />}
+      {numberRange > 0 && <Ranger listPoint={listPoint} listColor={listColor} setListPoint={setListPoint} />}
     </div>
   );
 }

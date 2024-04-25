@@ -1,26 +1,41 @@
-import { useContext, useState } from "react"
+import { useContext, useState, useCallback, useEffect} from "react"
 import { ViewerContext } from "../../contexts"
 import DetectSetting from "./DetectSetting"
 
-const materialColorlist = [
-    { color: '#00d4ff', label: '0% - 15%', ratio: { min: 0, max: 15 }, quantity: 0 },
-    { color: '#09e8cd', label: '15% - 50%', ratio: { min: 15, max: 50 }, quantity: 0 },
-    { color: '#e8de09', label: '80% - 100%', ratio: { min: 50, max: 80 }, quantity: 0 },
-    { color: '#dd1b1b', label: '80% - 100%', ratio: { min: 80, max: 100 }, quantity: 0 },
-]
-
 const ControlModel = ({ isShow }) => {
-    const [dataDetect, setDataDetact] = useState(materialColorlist)
+    const dataDetectLocal = JSON.parse(localStorage.getItem('materialColorList') as string)
+    const [dataDetect, setDataDetact] = useState('')
     const [postData, setPostData] = useState([])
 
-    const { isSetting, setIsSetting } = useContext(ViewerContext)
+    const { modelLoader, isSetting, setIsSetting, setLoaded, setIsModaling } = useContext(ViewerContext)
+
+    useEffect(() => {
+        if(isSetting){
+            setDataDetact(dataDetectLocal)
+        }
+    }, [isSetting])
+
 
     if (!isShow)
         return null
 
     const handlePostData = () => {
+        setIsSetting(false)
+        setLoaded(false)
+        setIsModaling(true)
+        setTimeout(() => {
+            localStorage.setItem('materialColorList', JSON.stringify(postData))
+            const rebarMesh = modelLoader?.getElement().reinforcingBarMesh
+            if(rebarMesh) {
+                modelLoader?.detectRebarAndVoxel(rebarMesh)
+            }
+            setLoaded(true)
+
+        }, 100)
+        
         console.log(postData)
     }
+
 
     return (
         <div className={`modal fade ${isSetting ? 'show' : ''}`} style={{ display: `${isSetting ? 'block' : 'none'}` }}>

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useRanger } from "react-ranger";
 import styled from "styled-components";
+import {b} from "vite/dist/node/types.d-aGj9QkWt";
 
 export const Track = styled("div")`
   display: inline-block;
@@ -53,7 +54,7 @@ export const Handle = styled("div")`
 `;
 
 const Ranger = ({ listColor, listPoint, setListPoint }) => {
-    const [values, setValues] = useState([]);
+    const [values, setValues] = useState<number[]>([]);
 
     useEffect(() => {
         setValues(listPoint)
@@ -65,8 +66,52 @@ const Ranger = ({ listColor, listPoint, setListPoint }) => {
         stepSize: 1,
         values,
         onChange: (values) => {
-            setValues
+            setValues(values)
             setListPoint(values)
+        },
+        onDrag: (arrValue: number[]) => {
+            let indexChangeValue: number = -1;
+            let isUp: boolean = false;
+            for (let i = 0; i < arrValue.length; i++) {
+                const newValue = arrValue[i];
+                const currentValue = values[i];
+                if (newValue !== currentValue) {
+                    indexChangeValue = i;
+                    if (newValue > currentValue) {
+                        isUp = true;
+                    }
+                    break;
+                }
+            }
+
+            if (indexChangeValue != -1) {
+                let newValue = arrValue[indexChangeValue];
+                if (isUp) {
+                    if (indexChangeValue >= values.length - 1 && newValue >= 100) {
+                        newValue = 100;
+                    } else {
+                        const nextValue = values[indexChangeValue + 1]
+                        if (newValue >= nextValue) {
+                            newValue = nextValue - 1;
+                        }
+                    }
+
+                } else {
+                    if (indexChangeValue == 0 && newValue <= 0) {
+                        newValue = 0;
+                    } else {
+                        const prevValue = values[indexChangeValue - 1]
+                        if (newValue <= prevValue) {
+                            newValue = prevValue + 1;
+                        }
+                    }
+                }
+
+                arrValue[indexChangeValue] = newValue;
+            }
+
+            setValues(arrValue);
+
         }
     });
 

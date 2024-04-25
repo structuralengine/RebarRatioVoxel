@@ -9,7 +9,7 @@ export type DataSettingsProps = {
 }
 
 const VoxelSetting = () => {
-    const { modelLoader ,setLoaded } = useContext(ViewerContext)
+    const { modelLoader ,setLoaded, setIsModaling } = useContext(ViewerContext)
     const [data, setData] = useState<DataSettingsProps>({
         boxSize: 0,
         boxRoundness: 0,
@@ -67,6 +67,7 @@ const VoxelSetting = () => {
 
     const handleApplySetting = useCallback(async () => {
         setLoaded(false)
+        setIsModaling(false)
         setTimeout(() => {
             if(data.boxSize !== modelLoader?.getSetting().boxSize) {
                 modelLoader?.settings.setupSetting(data)
