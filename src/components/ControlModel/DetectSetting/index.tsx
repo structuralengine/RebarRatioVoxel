@@ -84,6 +84,8 @@ const DetectSetting = ({ dataDetect, callBack, isSetting }) => {
       setListPoint(listLastPoint)
       setListColor(listLastColor)
       setNumberRange(value)
+    } else {
+      setNumberRange(value)
     }
   }
 
@@ -91,17 +93,17 @@ const DetectSetting = ({ dataDetect, callBack, isSetting }) => {
     <div className="detect-setting">
       <div className="d-flex number-range">
         <div>number of range</div>:
-        <select className="form-select" aria-label="Default select example"
+        <select className="form-select"
                 onChange={(e) => handleNumberRange(Number(e.target.value))}
                 value={numberRange}>
           {defaultColor.map((_, index) => {
             if (index === 0) {
               return (
-                <option value={index}>select range option</option>
+                <option key={index} value={index}>select range option</option>
               )
             } else {
               return (
-                <option value={index + 1}>{index + 1}</option>
+                <option key={index} value={index + 1}>{index + 1}</option>
               )
             }
           })}
