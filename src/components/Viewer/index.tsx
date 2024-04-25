@@ -14,7 +14,7 @@ const Viewer = () => {
     const [isSetting, setIsSetting] = useState<DataSettingsProps | undefined>(undefined)
     const [modelLoader, setModelLoader] = useState<ModelLoader | undefined>(undefined);
     const [voxelized, setVoxelized] = useState<boolean | undefined>(undefined)
-    const [isModaling, setIsModaling] = useState<boolean | undefined>(undefined)
+    const [isModaling, setIsModaling] = useState<boolean>(false)
 
     useEffect(() => {
         return () => {
@@ -57,7 +57,7 @@ const Viewer = () => {
         if (modelLoader) {
             await modelLoader.cleanUp()
         }
-
+        setIsModaling(false)
         setModelLoader(undefined)
         setLoaded(undefined)
         setVoxelized(undefined)

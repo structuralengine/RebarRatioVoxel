@@ -28,5 +28,5 @@ export interface ViewerContextProps {
     isSetting?: boolean,
     setIsSetting: (value?: boolean) => void,
     isModaling?: boolean,
-    setIsModaling: (value?: boolean) => void,
+    setIsModaling: (value?: any) => void,
 }

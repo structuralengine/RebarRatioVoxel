@@ -67,7 +67,7 @@ const VoxelSetting = () => {
 
     const handleApplySetting = useCallback(async () => {
         setLoaded(false)
-        setIsModaling(true)
+        setIsModaling(false)
         setTimeout(() => {
             if(data.boxSize !== modelLoader?.getSetting().boxSize) {
                 modelLoader?.settings.setupSetting(data)

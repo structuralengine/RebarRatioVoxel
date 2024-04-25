@@ -6,12 +6,13 @@ export type ItemElementType = {
     ratio: string
     quantity : number
     isShow: boolean
+    disabled?: boolean
     onChange?: (id: string, status: boolean) => void
     onShow?: (id: string) => void
     onRemove?: (id: string) => void
 }
 
-const ShowHideVoxel = ({ id, name, ratio, quantity, isShow, onChange, onShow, onRemove }: ItemElementType) => {
+const ShowHideVoxel = ({ id, name, ratio, quantity, isShow, onChange, onShow, onRemove, disabled}: ItemElementType) => {
     
     useEffect(() => {
         if (isShow) {
@@ -31,7 +32,7 @@ const ShowHideVoxel = ({ id, name, ratio, quantity, isShow, onChange, onShow, on
 
     return (
         <div>
-            <input type="checkbox" id={id} className="checkbox" checked={isShow} onChange={handleOnChange} />
+            <input type="checkbox" id={id} className="checkbox" checked={isShow} onChange={handleOnChange} disabled={disabled} />
             <label className="element" htmlFor={id}>
                 <div className="square element" style={{ background: `${id}`, padding: `${name === 'All' ? 0 : '6px'}` }}>{name === 'All' && name }  </div>  
             </label>

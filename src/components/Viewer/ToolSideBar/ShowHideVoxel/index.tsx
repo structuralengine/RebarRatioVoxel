@@ -35,28 +35,19 @@ const ShowHideVoxelElement = () => {
                 colorQuantity[color.color] = color.quantity;
             });
             const menuItem = items.map((item: ItemElementType) => {
-                if (isModaling) {
-                    setIsModaling(false)
+                if (item.id === 'all') {
                     return {
                         ...item,
                         isShow: true,
-                        quantity: 0
-                    };
-                }  else {
-                    if (item.id === 'all') {
-                        return {
-                            ...item,
-                            isShow: true,
-                            quantity: Object.values(colorQuantity).reduce((acc, curr) => acc + curr, 0)
-                        };
-                    }
-
-                    return {
-                        ...item,
-                        isShow: true,
-                        quantity: colorQuantity[item.id] || 0
+                        quantity: Object.values(colorQuantity).reduce((acc, curr) => acc + curr, 0)
                     };
                 }
+
+                return {
+                    ...item,
+                    isShow: true,
+                    quantity: colorQuantity[item.id] || 0
+                };
             });
 
             console.log('----', menuItem)
@@ -70,7 +61,7 @@ const ShowHideVoxelElement = () => {
             const menuItem = items.map((item: ItemElementType) => ({ ...item, isShow: false }))
             setMenuItem(menuItem)
         }
-    }, [loaded]);
+    }, [loaded, isModaling]);
 
     const handleOnChangeShow = useCallback(async (id: string, status: boolean) => {
         const menus = menuItem.map((item: ItemElementType) => {
@@ -110,6 +101,7 @@ const ShowHideVoxelElement = () => {
                 modelLoader?.detectRebarAndVoxel(rebarMesh)
             }
             setLoaded(true)
+            setIsModaling(true)
 
         }, 100)
 
@@ -120,16 +112,19 @@ const ShowHideVoxelElement = () => {
             <div className='header'>Show/Hide Voxel by Color</div>
             <div className='body'>
                 {materialColorList.length !== 0 && menuItem.map((item: ItemElementType) =>
-                    <ShowHideVoxel key={item.id} id={item.id} name={item.name} ratio={item.ratio} quantity={item.quantity} isShow={item.isShow} onChange={handleOnChangeShow} onShow={handleShowModel} onRemove={handleRemoveModel} />)}
+                    <ShowHideVoxel key={item.id} id={item.id} name={item.name} ratio={item.ratio} quantity={!isModaling ? 0 : item.quantity} 
+                    isShow={item.isShow} 
+                    onChange={handleOnChangeShow} 
+                    onShow={handleShowModel} 
+                    onRemove={handleRemoveModel} 
+                    disabled={!isModaling}
+                    />)}
                 <div className="button-setting">
+                    <button className="button" disabled={materialColorList.length == 0} onClick={() => handleDetectRebar()}>Detect</button>
                     <button type="button" className="button" onClick={() => setIsSetting(true)}>
                         Modal
                     </button>
                 </div>
-                <div className="button-setting">
-                    <button className="button" disabled={materialColorList.length == 0} onClick={() => handleDetectRebar()}>Detect</button>
-                </div>
-
             </div>
         </>
     );
