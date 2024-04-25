@@ -66,7 +66,6 @@ const Ranger = ({ listColor, listPoint, setListPoint }) => {
         stepSize: 1,
         values,
         onChange: (values) => {
-            console.log('values', values)
             setValues(values)
             setListPoint(values)
         },
