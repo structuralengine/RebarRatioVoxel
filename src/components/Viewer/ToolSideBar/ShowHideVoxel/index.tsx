@@ -3,7 +3,7 @@ import ShowHideVoxel from "./ShowHideVoxel";
 import { ItemElementType } from "./ShowHideVoxel";
 
 import { ViewerContext } from "../../../../contexts";
-import {materialColorlist} from "../../../../core";
+import { materialColorlist } from "../../../../core";
 
 const items: ItemElementType[] = [
     {
@@ -25,11 +25,11 @@ const items: ItemElementType[] = [
 const ShowHideVoxelElement = () => {
     const [menuItem, setMenuItem] = useState<ItemElementType[]>(items)
 
-    const { loaded, modelLoader} = useContext(ViewerContext)
+    const { loaded, modelLoader, setIsSetting } = useContext(ViewerContext)
 
     useEffect(() => {
         if (loaded) {
-            const colorQuantity : {[key : string] : number} = {}
+            const colorQuantity: { [key: string]: number } = {}
             materialColorlist.forEach((color) => {
                 colorQuantity[color.color] = color.quantity;
             });
@@ -41,7 +41,7 @@ const ShowHideVoxelElement = () => {
                         quantity: Object.values(colorQuantity).reduce((acc, curr) => acc + curr, 0)
                     };
                 }
-    
+
                 return {
                     ...item,
                     isShow: true,
@@ -93,11 +93,14 @@ const ShowHideVoxelElement = () => {
 
     return (
         <>
-        <div className='header'>Show/Hide Voxel by Color</div>
-           <div className='body'>
-            {menuItem.map((item: ItemElementType) =>
-                <ShowHideVoxel key={item.id} id={item.id} name={item.name} ratio={item.ratio} quantity={item.quantity} isShow={item.isShow} onChange={handleOnChangeShow} onShow={handleShowModel} onRemove={handleRemoveModel} />)}
-        </div>
+            <div className='header'>Show/Hide Voxel by Color</div>
+            <div className='body'>
+                {menuItem.map((item: ItemElementType) =>
+                    <ShowHideVoxel key={item.id} id={item.id} name={item.name} ratio={item.ratio} quantity={item.quantity} isShow={item.isShow} onChange={handleOnChangeShow} onShow={handleShowModel} onRemove={handleRemoveModel} />)}
+            </div>
+            <button type="button" className="btn btn-primary" onClick={() => setIsSetting(true)}>
+                modal
+            </button>
         </>
     );
 };

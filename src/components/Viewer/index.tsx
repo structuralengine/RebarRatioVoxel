@@ -7,6 +7,7 @@ import { ViewerContext } from "../../contexts";
 import UiControl from "./UiControl.tsx";
 import { IFCBUILDINGELEMENTPROXY } from "web-ifc";
 import { DataSettingsProps } from "./ToolSideBar/VoxelSetting/index.tsx";
+import ControlModel from "../ControlModel/index.tsx";
 const Viewer = () => {
     const viewerRef = useRef<HTMLDivElement | null>(null)
     const [loaded, setLoaded] = useState<boolean | undefined>(undefined)
@@ -72,6 +73,7 @@ const Viewer = () => {
             <div className='viewer-container'>
                 <div className='loading-container'>
                     <ModelLoading isShow={loaded === false} />
+                    <ControlModel isShow={loaded && voxelized}/>
                 </div>
                 <div className='drag-and-drop'>
                     <DragAndDrop onChangeFile={handleGetFileFromDrop} isShow={loaded === undefined} accept='.ifc' />
