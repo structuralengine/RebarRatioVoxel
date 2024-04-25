@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import Ranger from "./Components/Ranger";
+import { ViewerContext } from "../../../contexts";
 
 export const defaultColor = [
   '#52d726',
@@ -11,7 +12,7 @@ export const defaultColor = [
   '#9b46ce',
   '#8d6cef',
   '#8399ec',
-  '#007ed7',
+  '#dd1b1b',
 ]
 
 const DetectSetting = ({ dataDetect, callBack, isSetting }) => {
@@ -20,24 +21,26 @@ const DetectSetting = ({ dataDetect, callBack, isSetting }) => {
   const [numberRange, setNumberRange] = useState<string>('0')
 
   useEffect(() => {
+    // debugger
     const listLastPoint: any = []
-      if (dataDetect && isSetting) {
-        dataDetect.forEach((item: any) => {
-          if (item.ratio.max !== 100)
-            listLastPoint.push(item.ratio.max)
-        })
-        setNumberRange((listLastPoint.length + 1).toString())
-        setListPoint(listLastPoint)
-        setListColor(dataDetect.map((item: any) => item.color))
-      }
+    if (dataDetect && isSetting) {
+      dataDetect.forEach((item: any) => {
+        if (item.ratio.max !== 100)
+          listLastPoint.push(item.ratio.max)
+      })
+      setNumberRange((listLastPoint.length + 1).toString())
+      setListPoint(listLastPoint)
+      setListColor(dataDetect.map((item: any) => item.color))
+    }
   }, [dataDetect, isSetting])
 
   useEffect(() => {
     const postData: any = []
     const newList = [...listPoint]
-    newList.push(100)
+    newList.push('100')
+    console.log(newList)
     newList.forEach((item, index) => {
-      if(index === 0){
+      if (index === 0) {
         postData.push({
           color: listColor[index],
           label: `0% - ${item}%`,
@@ -47,9 +50,9 @@ const DetectSetting = ({ dataDetect, callBack, isSetting }) => {
           }
         })
       }
-      else if (index <= listPoint.length - 1){
+      else if (index <= newList.length - 1) {
         postData.push({
-          color: listColor[index],
+          color: index === newList.length - 1 ? listColor[listColor.length - 1] : listColor[index],
           label: `${listPoint[index - 1]}% - ${item}%`,
           ratio: {
             min: parseInt(listPoint[index - 1]),
@@ -68,11 +71,12 @@ const DetectSetting = ({ dataDetect, callBack, isSetting }) => {
     const range = parseInt(value)
     if (range > 0) {
       for (let i = 1; i <= range; i++) {
-        listLastPoint.push((100/range * i).toFixed(0))
+        if (range !== i)
+          listLastPoint.push((100 / range * i).toFixed(0))
         if (i === range) {
           listLastColor.push(defaultColor[defaultColor.length - 1])
         } else {
-          listLastColor.push(defaultColor[i])
+          listLastColor.push(defaultColor[i - 1])
         }
       }
 

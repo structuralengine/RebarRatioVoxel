@@ -6,7 +6,7 @@ const materialColorlist = [
     { color: '#00d4ff', label: '0% - 15%', ratio: { min: 0, max: 15 }, quantity: 0 },
     { color: '#09e8cd', label: '15% - 50%', ratio: { min: 15, max: 50 }, quantity: 0 },
     { color: '#e8de09', label: '80% - 100%', ratio: { min: 50, max: 80 }, quantity: 0 },
-    { color: '#09e810', label: '80% - 100%', ratio: { min: 80, max: 100 }, quantity: 0 },
+    { color: '#dd1b1b', label: '80% - 100%', ratio: { min: 80, max: 100 }, quantity: 0 },
 ]
 
 const ControlModel = ({ isShow }) => {
