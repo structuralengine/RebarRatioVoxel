@@ -107,7 +107,7 @@ const ShowHideVoxelElement = () => {
 
     return (
         <>
-            <div className='header'>Show/Hide Voxel by Color</div>
+            <div className='header'>Rebar Ratio Voxel</div>
             <div className='body'>
                 {materialColorList.length !== 0 && menuItem.map((item: ItemElementType) =>
                     <ShowHideVoxel key={item.id} id={item.id} name={item.name} ratio={item.ratio} quantity={!isModaling ? 0 : item.quantity} 

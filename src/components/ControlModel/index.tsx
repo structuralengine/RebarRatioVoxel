@@ -42,7 +42,7 @@ const ControlModel = ({ isShow }) => {
             <div className="modal-dialog modal-dialog-centered modal-lg">
                 <div className="modal-content">
                     <div className="modal-header">
-                        <h5 className="modal-title">Control settings</h5>
+                        <h5 className="modal-title">Config Setting</h5>
                         <button type="button" className="btn-close" onClick={() => setIsSetting(false)}></button>
                     </div>
                     <div className="modal-body">
@@ -50,7 +50,7 @@ const ControlModel = ({ isShow }) => {
                     </div>
                     <div className="modal-footer">
                         <button type="button" className="btn btn-secondary" onClick={() => setIsSetting(false)}>Close</button>
-                        <button type="button" className="btn btn-primary" onClick={() => handlePostData()}>Accept</button>
+                        <button type="button" className="btn btn-primary" onClick={() => handlePostData()}>Detect</button>
                     </div>
                 </div>
             </div>
