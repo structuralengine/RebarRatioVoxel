@@ -5,12 +5,14 @@ export const defaultColor = [
   '#52d726',
   '#ffaf00',
   '#ff7300',
-  '#7bdddc',
   '#dd1b79',
   '#c758d0',
   '#9b46ce',
   '#8d6cef',
   '#8399ec',
+  '#007ed7',
+  '#7bdddc',
+
   '#dd1b1b',
 ]
 

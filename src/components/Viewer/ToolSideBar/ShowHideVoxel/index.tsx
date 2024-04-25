@@ -1,54 +1,65 @@
 import { useCallback, useContext, useEffect, useState } from "react";
 import ShowHideVoxel from "./ShowHideVoxel";
 import { ItemElementType } from "./ShowHideVoxel";
-
 import { ViewerContext } from "../../../../contexts";
-import { materialColorlist } from "../../../../core";
-
-const items: ItemElementType[] = [
-    {
-        id: 'all',
-        name: 'All',
-        ratio: '',
-        quantity: 0,
-        isShow: false
-    },
-    ...materialColorlist.map((color) => ({
-        id: color.color,
-        name: color.label,
-        ratio: color.ratio,
-        quantity: color.quantity,
-        isShow: false
-    }))
-]
 
 const ShowHideVoxelElement = () => {
-    const [menuItem, setMenuItem] = useState<ItemElementType[]>(items)
+    const [menuItem, setMenuItem] = useState<ItemElementType[]>([])
 
-    const { loaded, modelLoader, setIsSetting } = useContext(ViewerContext)
+    const { isModaling, loaded, modelLoader, setLoaded, setIsSetting, setIsModaling } = useContext(ViewerContext)
+
+    const materialColorList = JSON.parse(localStorage.getItem('materialColorList') || '[]')
+
+    const items: ItemElementType[] = [
+        {
+            id: 'all',
+            name: 'All',
+            ratio: '',
+            quantity: 0,
+            isShow: false
+        },
+        ...materialColorList.map((color: any) => ({
+            id: color.color,
+            name: color.label,
+            ratio: `${color.ratio.min}% - ${color.ratio.max}%`,
+            quantity: color.quantity,
+            isShow: false
+        }))
+    ]
 
     useEffect(() => {
-        if (loaded) {
+
+        if (loaded ) {
             const colorQuantity: { [key: string]: number } = {}
-            materialColorlist.forEach((color) => {
+            materialColorList.forEach((color: any) => {
                 colorQuantity[color.color] = color.quantity;
             });
             const menuItem = items.map((item: ItemElementType) => {
-                if (item.id === 'all') {
+                if (isModaling) {
+                    setIsModaling(false)
                     return {
                         ...item,
                         isShow: true,
-                        quantity: Object.values(colorQuantity).reduce((acc, curr) => acc + curr, 0)
+                        quantity: 0
+                    };
+                }  else {
+                    if (item.id === 'all') {
+                        return {
+                            ...item,
+                            isShow: true,
+                            quantity: Object.values(colorQuantity).reduce((acc, curr) => acc + curr, 0)
+                        };
+                    }
+
+                    return {
+                        ...item,
+                        isShow: true,
+                        quantity: colorQuantity[item.id] || 0
                     };
                 }
-
-                return {
-                    ...item,
-                    isShow: true,
-                    quantity: colorQuantity[item.id] || 0
-                };
             });
 
+            console.log('----', menuItem)
             setMenuItem(menuItem)
         } else {
             const menuItem = items.map((item: ItemElementType) => ({ ...item, isShow: false }))
@@ -91,16 +102,35 @@ const ShowHideVoxelElement = () => {
         modelLoader?.hideVoxelByColor(id)
     }, [modelLoader])
 
+    const handleDetectRebar = useCallback(async () => {
+        setLoaded(false)
+        setTimeout(() => {
+            const rebarMesh = modelLoader?.getElement().reinforcingBarMesh
+            if (rebarMesh) {
+                modelLoader?.detectRebarAndVoxel(rebarMesh)
+            }
+            setLoaded(true)
+
+        }, 100)
+
+    }, [modelLoader])
+
     return (
         <>
             <div className='header'>Show/Hide Voxel by Color</div>
             <div className='body'>
-                {menuItem.map((item: ItemElementType) =>
+                {materialColorList.length !== 0 && menuItem.map((item: ItemElementType) =>
                     <ShowHideVoxel key={item.id} id={item.id} name={item.name} ratio={item.ratio} quantity={item.quantity} isShow={item.isShow} onChange={handleOnChangeShow} onShow={handleShowModel} onRemove={handleRemoveModel} />)}
+                <div className="button-setting">
+                    <button type="button" className="button" onClick={() => setIsSetting(true)}>
+                        Modal
+                    </button>
+                </div>
+                <div className="button-setting">
+                    <button className="button" disabled={materialColorList.length == 0} onClick={() => handleDetectRebar()}>Detect</button>
+                </div>
+
             </div>
-            <button type="button" className="btn btn-primary" onClick={() => setIsSetting(true)}>
-                modal
-            </button>
         </>
     );
 };

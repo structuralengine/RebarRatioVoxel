@@ -1,4 +1,4 @@
-import { useContext, useState } from "react"
+import { useContext, useState, useCallback} from "react"
 import { ViewerContext } from "../../contexts"
 import DetectSetting from "./DetectSetting"
 
@@ -13,14 +13,27 @@ const ControlModel = ({ isShow }) => {
     const [dataDetect, setDataDetact] = useState(materialColorlist)
     const [postData, setPostData] = useState([])
 
-    const { isSetting, setIsSetting } = useContext(ViewerContext)
+    const { modelLoader, isSetting, setIsSetting, setLoaded } = useContext(ViewerContext)
 
     if (!isShow)
         return null
 
     const handlePostData = () => {
+        setIsSetting(false)
+        setLoaded(false)
+        setTimeout(() => {
+            localStorage.setItem('materialColorList', JSON.stringify(postData))
+            const rebarMesh = modelLoader?.getElement().reinforcingBarMesh
+            if(rebarMesh) {
+                modelLoader?.detectRebarAndVoxel(rebarMesh)
+            }
+            setLoaded(true)
+
+        }, 100)
+        
         console.log(postData)
     }
+
 
     return (
         <div className={`modal fade ${isSetting ? 'show' : ''}`} style={{ display: `${isSetting ? 'block' : 'none'}` }}>

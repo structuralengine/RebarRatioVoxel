@@ -12,7 +12,7 @@ export type ItemElementType = {
 }
 
 const ShowHideVoxel = ({ id, name, ratio, quantity, isShow, onChange, onShow, onRemove }: ItemElementType) => {
-
+    
     useEffect(() => {
         if (isShow) {
             onShow?.(id)
@@ -33,7 +33,7 @@ const ShowHideVoxel = ({ id, name, ratio, quantity, isShow, onChange, onShow, on
         <div>
             <input type="checkbox" id={id} className="checkbox" checked={isShow} onChange={handleOnChange} />
             <label className="element" htmlFor={id}>
-                <div className="square element" style={{ background: `${name.replace('0x', '#')}`, padding: `${name === 'All' ? 0 : '6px'}` }}>{name === 'All' && name }  </div>  
+                <div className="square element" style={{ background: `${id}`, padding: `${name === 'All' ? 0 : '6px'}` }}>{name === 'All' && name }  </div>  
             </label>
             <label style={{marginLeft: '5px'}} className="element">{ratio} ({quantity})</label>
         </div>

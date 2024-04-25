@@ -5,7 +5,7 @@ import { Fragment, FragmentMesh } from "bim-fragment";
 import { CommonLoader } from "./common-loader.ts";
 import { ModelHandler } from "./model-handler.ts";
 import { IFCBUILDINGELEMENTPROXY, IFCREINFORCINGBAR } from "web-ifc";
-import {ModelElement, VoxelModelData} from "./model-element.ts";
+import {ModelElement} from "./model-element.ts";
 
 export const defaultVolume = 300;
 export const defaultVoxelSize = 0.5;
@@ -106,6 +106,9 @@ export class ModelLoader extends CommonLoader {
 
     public async reSetupLoadModel() {
         await this._handle.reSetupVoxel()
+    }
+    public async detectRebarAndVoxel(rebarMesh : THREE.Mesh) {
+        await this._handle.detectRebarAndVoxel(rebarMesh)
     }
 
     public async reRenderVoxel(boxSize: number, boxRoundness: number, transparent: number) {

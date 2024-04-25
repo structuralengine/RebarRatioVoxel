@@ -14,6 +14,7 @@ const Viewer = () => {
     const [isSetting, setIsSetting] = useState<DataSettingsProps | undefined>(undefined)
     const [modelLoader, setModelLoader] = useState<ModelLoader | undefined>(undefined);
     const [voxelized, setVoxelized] = useState<boolean | undefined>(undefined)
+    const [isModaling, setIsModaling] = useState<boolean | undefined>(undefined)
 
     useEffect(() => {
         return () => {
@@ -69,7 +70,7 @@ const Viewer = () => {
     }, [modelLoader])
 
     return (
-        <ViewerContext.Provider value={{ loaded, setLoaded, modelLoader, setModelLoader, closeViewer: cleanUpViewer, voxelized, setVoxelized, isSetting, setIsSetting }}>
+        <ViewerContext.Provider value={{ loaded, setLoaded, modelLoader, setModelLoader, closeViewer: cleanUpViewer, voxelized, setVoxelized, isSetting, setIsSetting, isModaling, setIsModaling}}>
             <div className='viewer-container'>
                 <div className='loading-container'>
                     <ModelLoading isShow={loaded === false} />
