@@ -33,7 +33,7 @@ const ElementShow = () => {
 
     useEffect(() => {
         if (loaded) {
-            const menuItem = items.map((item: ItemElementType) => ({ ...item, isShow: true }))
+            const menuItem = items.map((item: ItemElementType) => ({ ...item, isShow: !['all', 'concrete'].includes(item.id) }))
             setMenuItem(menuItem)
         } else {
             const menuItem = items.map((item: ItemElementType) => ({ ...item, isShow: false }))
