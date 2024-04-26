@@ -37,14 +37,6 @@ const VoxelSetting = () => {
             max: sizeLimit,
         },
         {
-            id: 'boxRoundness',
-            name: 'Voxel roundness',
-            step: 0.01,
-            value: data.boxRoundness,
-            min: 0,
-            max: 0.1,
-        },
-        {
             id: 'transparent',
             name: 'Transparent',
             step: 0.1,

@@ -1,8 +1,9 @@
-import {IfcFragmentSettings} from "openbim-components/src/fragments/FragmentIfcLoader/src";
+import { IfcFragmentSettings } from "openbim-components/src/fragments/FragmentIfcLoader/src";
 import * as THREE from "three";
 import * as OBC from "openbim-components";
-import {FragmentsGroup} from "bim-fragment";
-import {CullerUpdater} from "./culler-updater.ts";
+import { FragmentsGroup } from "bim-fragment";
+import { CullerUpdater } from "./culler-updater.ts";
+import { ContextMenu } from "./context-menu.ts";
 
 export class CommonLoader {
     protected _container: HTMLDivElement;
@@ -11,13 +12,13 @@ export class CommonLoader {
     protected _tools: OBC.ToolComponent;
     protected _scene?: OBC.SimpleScene;
     protected _renderer?: OBC.SimpleRenderer;
-    protected _camera?: OBC.SimpleCamera;
+    protected _camera?: OBC.OrthoPerspectiveCamera;
     protected _raycaster?: OBC.SimpleRaycaster;
     protected _loader?: OBC.FragmentIfcLoader;
     protected _groupModel?: FragmentsGroup;
-    protected _cullerUpdate: CullerUpdater
+    protected _cullerUpdate: CullerUpdater;
 
-    constructor(container : HTMLDivElement) {
+    constructor(container: HTMLDivElement) {
         this._components = new OBC.Components();
         this._tools = this._components.tools
         this._container = container;
@@ -67,16 +68,17 @@ export class CommonLoader {
 
     }
 
-    protected async setup(): Promise<boolean>{
+    protected async setup(): Promise<boolean> {
         try {
             this._scene = this._components.scene = new OBC.SimpleScene(this._components);
             this._renderer = this._components.renderer = new OBC.SimpleRenderer(this._components, this._container);
-            this._camera = this._components.camera = new OBC.SimpleCamera(this._components);
+            this._camera = this._components.camera = new OBC.OrthoPerspectiveCamera(this._components);
             this._raycaster = this._components.raycaster = new OBC.SimpleRaycaster(this._components);
             this._renderer.get().setSize(window.innerWidth, window.innerHeight)
             await this._components.init();
             await this.setupTool();
             this._camera.get().lookAt(0, 0, 0);
+            new ContextMenu(this._components)
             return true;
         } catch (err) {
             console.error(err)
@@ -99,7 +101,7 @@ export class CommonLoader {
         new OBC.SimpleGrid(this._components)
         const hider = new OBC.FragmentHider(this._components);
         const classifier = new OBC.FragmentClassifier(this._components);
-        const spaces = classifier.find({entities: ["IFCSPACE"]});
+        const spaces = classifier.find({ entities: ["IFCSPACE"] });
         hider.set(true, spaces);
 
         const clipper = this._components.tools.get(OBC.EdgesClipper);
@@ -157,18 +159,19 @@ export class CommonLoader {
         const dimensions = this._components.tools.get(OBC.LengthMeasurement);
 
         window.addEventListener("keydown", (event) => {
-            if(event.code === "Escape") {
+            if (event.code === "Escape") {
                 dimensions.cancelCreation();
                 dimensions.enabled = false;
             }
         })
 
         const propsManager = new OBC.IfcPropertiesManager(this._components);
-        propsManager.wasm = {...this._settings.wasm}
+        propsManager.wasm = { ...this._settings.wasm }
         propsProcessor.propertiesManager = propsManager;
 
         const exploder = new OBC.FragmentExploder(this._components);
         mainToolbar.addChild(exploder.uiElement.get("main"));
+        mainToolbar.dispose()
 
         const navCube = this._components.tools.get(OBC.CubeMap);
         navCube.setPosition("bottom-left");
@@ -176,7 +179,6 @@ export class CommonLoader {
 
         plans.onNavigated.add(() => {
             navCube.visible = false;
-
             materialManager.setBackgroundColor(new THREE.Color('white'));
             materialManager.set(true, ["white"]);
         });
