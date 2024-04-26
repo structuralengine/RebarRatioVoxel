@@ -2,7 +2,6 @@ import * as THREE from "three";
 import {ModelLoader} from "./model-loader.ts";
 import {FragmentMesh} from "bim-fragment";
 import {MeshBVH} from "three-mesh-bvh";
-import {MeshBasicMaterial} from "three";
 import {mergeGeometries} from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import {RoundedBoxGeometry} from "three/examples/jsm/geometries/RoundedBoxGeometry.js";
 
@@ -136,7 +135,7 @@ export class ModelElement {
             alConcreteGeometry.computeBoundingSphere()
             // @ts-ignore
             alConcreteGeometry.boundsTree = new MeshBVH(alConcreteGeometry);
-            this.concreteMesh = new THREE.Mesh(alConcreteGeometry, new MeshBasicMaterial({color: '#bfc3c9'}))
+            this.concreteMesh = new THREE.Mesh(alConcreteGeometry,  new THREE.MeshMatcapMaterial({color: '#ffffff'}))
         }
 
         const size = new THREE.Vector3();
@@ -170,7 +169,7 @@ export class ModelElement {
             alReBarGeometry.computeBoundingSphere()
             // @ts-ignore
             alReBarGeometry.boundsTree = new MeshBVH(alReBarGeometry);
-            this.reinforcingBarMesh = new THREE.Mesh(alReBarGeometry, new MeshBasicMaterial({color: '#bfc3c9'}))
+            this.reinforcingBarMesh = new THREE.Mesh(alReBarGeometry, new THREE.MeshMatcapMaterial({color: '#ffffff'}))
         }
 
     }

@@ -199,8 +199,8 @@ export class ModelLoader extends CommonLoader {
         if (this._groupModel) {
             const materialManager = this._tools.get(OBC.MaterialManager);
             const meshes = this._groupModel.items.map((frag: Fragment) => frag.mesh);
-            const color = new THREE.Color(0xbfc3c9);
-            const material = new THREE.MeshBasicMaterial({ color: color });
+            const color = new THREE.Color(0xFFFFFF);
+            const material = new THREE.MeshMatcapMaterial({color: color});
             materialManager.addMaterial("material", material)
             materialManager.addMeshes("material", meshes);
             materialManager.set(true, ["material"]);
