@@ -87,7 +87,7 @@ export class ModelHandler {
                     const box = new THREE.Box3()
                     box.min.setScalar(-boxSize / 2).add(centerPoint);
                     box.max.setScalar(boxSize / 2).add(centerPoint);
-                                      
+
                     if (this.checkCollisionByBVH(centerPoint, box, concreteMesh.matrixWorld, concreteMesh.geometry)) {
                         const newVoxel = new VoxelModelData(centerPoint, boxSize, boxRoundness, transparent)
                         modelElement.voxelModelData.push(newVoxel);
@@ -103,7 +103,6 @@ export class ModelHandler {
         console.log(modelElement.voxelHasRebar.length, modelElement.voxelHasNotRebar.length)
     }
 
-    // New algorithm check collision
     private checkCollisionByBVH(center: THREE.Vector3, box: THREE.Box3, matrixWorld: THREE.Matrix4, geometry: BufferGeometry) {
         const invMat = new THREE.Matrix4().copy(matrixWorld.clone()).invert();
 
@@ -144,7 +143,6 @@ export class ModelHandler {
         return false;
     }
 
-    // New algorithm check collision
     private checkCollisionRebarByBVH(center: THREE.Vector3, box: THREE.Box3, matrixWorld: THREE.Matrix4, geometry: BufferGeometry) {
         const invMat = new THREE.Matrix4().copy(matrixWorld.clone()).invert();
 

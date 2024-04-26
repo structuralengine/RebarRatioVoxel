@@ -3,17 +3,19 @@ import Ranger from "./Components/Ranger";
 import { DataDetectItemProps, DataDetectProps } from "..";
 
 const defaultColor: string[] = [
-  '#0500fa',
-  '#2302d9',
-  '#3c00c4',
-  '#4f00b0',
-  '#6b0091',
-  '#85007a',
-  '#9f005c',
-  '#b80144',
-  '#cf002a',
-  '#ea0315',
+  '#0000FF',
+  '#5d9ee3',
+  '#00FFFF',
+  '#27d6a4',
+  '#3bed0e',
+  '#008000',
+  '#FFFF00',
+  '#cf8d1d',
+  '#FFA500',
+  '#FF0000',
 ]
+
+
 
 type DetectSettingProps = {
   dataDetect: DataDetectProps | undefined,

@@ -50,7 +50,6 @@ const ControlModel :React.FC<ControlModelProps> = ({ isShow }) => {
 
         }, 100)
         
-        console.log(postData)
     }
 
 
