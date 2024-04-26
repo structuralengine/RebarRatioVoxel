@@ -54,6 +54,8 @@ export class ModelHandler {
         const transparent = this._modelLoader.settings.transparent
 
         modelElement.voxelModelData = [];
+        modelElement.voxelHasRebar = [];
+        modelElement.voxelHasNotRebar = [];
 
         const minX = boundingBoxOfConcrete.min.x
         const minY = boundingBoxOfConcrete.min.y
@@ -85,15 +87,20 @@ export class ModelHandler {
                     const box = new THREE.Box3()
                     box.min.setScalar(-boxSize / 2).add(centerPoint);
                     box.max.setScalar(boxSize / 2).add(centerPoint);
-
+                                      
                     if (this.checkCollisionByBVH(centerPoint, box, concreteMesh.matrixWorld, concreteMesh.geometry)) {
                         const newVoxel = new VoxelModelData(centerPoint, boxSize, boxRoundness, transparent)
                         modelElement.voxelModelData.push(newVoxel);
+                        if(this.checkCollisionRebarByBVH(centerPoint,box,rebar.matrixWorld,rebar.geometry)) {
+                            modelElement.voxelHasRebar.push(newVoxel)
+                        } else {
+                            modelElement.voxelHasNotRebar.push(newVoxel)
+                        }
                     }
                 }
             }
         }
-        // this.detectRebarAndVoxel(rebar)
+        console.log(modelElement.voxelHasRebar.length, modelElement.voxelHasNotRebar.length)
     }
 
     // New algorithm check collision
@@ -189,7 +196,8 @@ export class ModelHandler {
     }
 
     public detectRebarAndVoxel(rebar: THREE.Mesh, gridSize: number = 0.05) {
-        this._modelLoader.getElement().voxelModelData.forEach((voxel: VoxelModelData) => {
+        const modelElement = this._modelLoader.getElement()
+        modelElement.voxelModelData.forEach((voxel: VoxelModelData) => {
             this._modelLoader.getScene()?.get().remove(voxel.mesh)
         })
         const materialColorList = localStorage.getItem('materialColorList')
@@ -201,25 +209,39 @@ export class ModelHandler {
             ...color,
             quantity: 0
         }));
-        this._modelLoader.getElement().voxelModelData.forEach((voxel: VoxelModelData) => {
+
+        modelElement.voxelHasNotRebar.forEach((voxel : VoxelModelData) => {
+            let indexColor = 0;
+            const mesh = voxel.mesh.children[1] as THREE.Mesh
+            colorList[indexColor].quantity++
+            voxel.color = colorList[indexColor].color;
+            // @ts-ignore
+            mesh.material.color.set(voxel.color);
+        })
+
+        this._modelLoader.getElement().voxelHasRebar.forEach((voxel: VoxelModelData) => {
             const minX = voxel.center.x - voxel.boxSize / 2;
             const minY = voxel.center.y - voxel.boxSize / 2;
             const minZ = voxel.center.z - voxel.boxSize / 2;
 
-            const maxX = voxel.center.x + voxel.boxSize / 2;
-            const maxY = voxel.center.y + voxel.boxSize / 2;
-            const maxZ = voxel.center.z + voxel.boxSize / 2;
+            const maxX = (voxel.center.x + voxel.boxSize / 2 - minX) / gridSize;
+            const maxY = (voxel.center.y + voxel.boxSize / 2 - minY) / gridSize;
+            const maxZ = (voxel.center.z + voxel.boxSize / 2 - minZ) / gridSize;
 
             let count = 0;
-            for (let x = minX; x <= maxX; x += gridSize) {
-                for (let y = minY; y < maxY; y += gridSize) {
-                    for (let z = minZ; z < maxZ; z += gridSize) {
-                        const centerPoint = new THREE.Vector3(x + gridSize / 2 , y + gridSize / 2, z + gridSize / 2);
+            for (let x = 0; x < maxX - gridSize; x++) {
+                for (let y = 0; y < maxY - gridSize; y++) {
+                    for (let z = 0; z < maxZ - gridSize; z++) {
+                        const centerPoint = new THREE.Vector3(
+                            minX + gridSize * x, 
+                            minY + gridSize * y, 
+                            minZ + gridSize * z
+                        );
 
                         const box = new THREE.Box3()
                         box.min.setScalar(-gridSize / 2).add(centerPoint);
                         box.max.setScalar(gridSize / 2).add(centerPoint);
-
+                        
                         if (this.checkCollisionRebarByBVH(centerPoint, box, rebar.matrixWorld, rebar.geometry)) {
                             count++;
                         }
@@ -236,8 +258,7 @@ export class ModelHandler {
         
             let indexColor = 0;
             let lastIndex = colorList.length - 1;
-            
-            for (let i = 1; i < lastIndex; i++) {
+            for (let i = 1; i <= lastIndex; i++) {
                 if (ratio > colorList[i].ratio.min && ratio <= colorList[i].ratio.max) {
                     indexColor = i;
                     break;
@@ -254,7 +275,9 @@ export class ModelHandler {
             // @ts-ignore
             hoverMesh.material.color.set(voxel.color);
         });
-        this._modelLoader.getElement().voxelModelData.forEach((voxel: VoxelModelData) => {
+        modelElement.voxelModelData = [...modelElement.voxelHasNotRebar,...modelElement.voxelHasRebar]
+
+        modelElement.voxelModelData.forEach((voxel: VoxelModelData) => {
             this._modelLoader.getScene()?.get().add(voxel.mesh)
         })
         localStorage.setItem('materialColorList', JSON.stringify(colorList))

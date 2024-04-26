@@ -69,6 +69,8 @@ export class ModelElement {
     private _reinforcingBarList: FragmentMesh[];
     public boundingBoxConcrete?: THREE.Box3;
     public voxelModelData: VoxelModelData[]
+    public voxelHasRebar: VoxelModelData[]
+    public voxelHasNotRebar: VoxelModelData[]
 
     public concreteMesh?: THREE.Mesh;
     public reinforcingBarMesh?: THREE.Mesh;
@@ -79,12 +81,16 @@ export class ModelElement {
         this.concreteVolume = 0;
         this._reinforcingBarList = [];
         this.voxelModelData = [];
+        this.voxelHasRebar = [];
+        this.voxelHasNotRebar = [];
     }
 
     public cleanUp() {
         this._concreteList = []
         this._reinforcingBarList = []
         this.voxelModelData = []
+        this.voxelHasRebar = []
+        this.voxelHasNotRebar = []
     }
 
     set concreteList(list: any[]) {
