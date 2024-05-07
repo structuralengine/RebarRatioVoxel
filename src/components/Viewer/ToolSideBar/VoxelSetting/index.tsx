@@ -30,7 +30,7 @@ const VoxelSetting = () => {
     const UiSettings = useMemo(() => [
         {
             id: 'boxSize',
-            name: 'Voxel size',
+            name: 'ボクセルサイズ',
             step: 0.1,
             value: data.boxSize,
             min: 0.1,
@@ -38,7 +38,7 @@ const VoxelSetting = () => {
         },
         {
             id: 'transparent',
-            name: 'Transparent',
+            name: '透明度',
             step: 0.1,
             value: data.transparent,
             min: 0.1,
@@ -79,7 +79,7 @@ const VoxelSetting = () => {
 
     return (
         <>
-            <div className='header'>Setting voxel</div>
+            <div className='header'>ボクセルの設定</div>
             <div className='body'>
                 {UiSettings.map((setting) =>
                     <div key={setting.id}>
@@ -91,7 +91,7 @@ const VoxelSetting = () => {
                     </div>
                 )}
                 <div className='button-setting'>
-                    <button className='button' onClick={() => handleApplySetting()}>Apply</button>
+                    <button className='button' onClick={() => handleApplySetting()}>適用</button>
                 </div>
             </div>
         </>

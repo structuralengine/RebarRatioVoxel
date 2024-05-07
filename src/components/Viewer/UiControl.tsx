@@ -15,7 +15,7 @@ const UiControl = ({isShow}: ToolSideBarProps) => {
             {
                 isShow &&
                 <>
-                    <div className='header'>Controls</div>
+                    <div className='header'>コントロールメニュー</div>
                     <div className='body'>
                       <VoxelSetting />
                       <ShowHideVoxelElement />

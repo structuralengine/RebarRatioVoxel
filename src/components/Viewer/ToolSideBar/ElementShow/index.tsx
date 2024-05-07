@@ -6,22 +6,22 @@ import { IFCBUILDINGELEMENTPROXY, IFCREINFORCINGBAR } from "web-ifc";
 const items: ItemElementType[] = [
     {
         id: 'all',
-        name: 'All',
+        name: 'すべて',
         isShow: false
     },
     {
         id: 'voxel',
-        name: 'Voxel',
+        name: 'ボクセル',
         isShow: false
     },
     {
         id: 'concrete',
-        name: 'Concrete',
+        name: 'コンクリート',
         isShow: false
     },
     {
         id: 'reinforcingBar',
-        name: 'Reinforcing Bar',
+        name: '鉄筋',
         isShow: false
     }
 ]
@@ -105,7 +105,7 @@ const ElementShow = () => {
 
     return (
         <>
-            <div className='header'>Element show</div>
+            <div className='header'>モデルの表示/非表示</div>
             <div className='body'>
                 <div className='element-show-container'>
                     {menuItem.map((item: ItemElementType) =>

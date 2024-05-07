@@ -75,7 +75,7 @@ const DragAndDrop : React.FC<DragAndDropProps> = ({onChangeFile, isShow, accept=
             />
 
             <UploadIcon style={{marginBottom: 12}} color='#ffffff' width={100} height={100}/>
-            <p>Click to upload or drag and drop</p>
+            <p>クリックまたはドラッグ＆ドロップでIFCファイルを開く</p>
         </div>
     );
 };

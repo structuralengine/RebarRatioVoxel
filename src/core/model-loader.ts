@@ -145,7 +145,7 @@ export class ModelLoader extends CommonLoader {
             });
             const voxelButton = new OBC.Button(this._components)
             voxelButton.materialIcon = 'apps'
-            voxelButton.tooltip = 'Voxelize'
+            voxelButton.tooltip = 'ボクセル化'
             voxelButton.onClick.add(() => {
                 this._callBack(this._visibleVoxel, false)
                 setTimeout(() => {
@@ -162,7 +162,7 @@ export class ModelLoader extends CommonLoader {
             })
             const closeModelButton = new OBC.Button(this._components)
             closeModelButton.materialIcon = 'cancel'
-            closeModelButton.tooltip = 'Close model'
+            closeModelButton.tooltip = 'モデルを閉じる'
             closeModelButton.onClick.add(() => {
                 this._cleanViewer()
                 this._visibleVoxel = false

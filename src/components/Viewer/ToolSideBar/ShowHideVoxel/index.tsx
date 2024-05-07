@@ -107,7 +107,7 @@ const ShowHideVoxelElement = () => {
 
     return (
         <>
-            <div className='header'>Rebar Ratio Voxel</div>
+            <div className='header'>鉄筋比可視化の設定</div>
             <div className='body'>
                 {materialColorList.length !== 0 && menuItem.map((item: ItemElementType) =>
                     <ShowHideVoxel key={item.id} id={item.id} name={item.name} ratio={item.ratio} quantity={!isModaling ? 0 : item.quantity} 
@@ -118,9 +118,9 @@ const ShowHideVoxelElement = () => {
                     disabled={!isModaling}
                     />)}
                 <div className="button-setting">
-                    <button className="button" disabled={materialColorList.length == 0} onClick={() => handleDetectRebar()}>Detect</button>
+                    <button className="button" disabled={materialColorList.length == 0} onClick={() => handleDetectRebar()}>実行</button>
                     <button type="button" className="button" onClick={() => setIsSetting(true)}>
-                        Config
+                        設定
                     </button>
                 </div>
             </div>

@@ -99,7 +99,7 @@ const DetectSetting :React.FC<DetectSettingProps> = ({ dataDetect, callBack, isS
   return (
     <div className="detect-setting">
       <div className="d-flex number-range">
-        <div>number of range</div>:
+        <div>分割数</div>:
         <select className="form-select"
                 onChange={(e) => handleNumberRange(Number(e.target.value))}
                 value={numberRange}
@@ -107,7 +107,7 @@ const DetectSetting :React.FC<DetectSettingProps> = ({ dataDetect, callBack, isS
           {defaultColor.map((_, index) => {
             if (index === 0) {
               return (
-                <option key={index} value={index}>select range option</option>
+                <option key={index} value={index}>分割数を選択</option>
               )
             } else {
               return (

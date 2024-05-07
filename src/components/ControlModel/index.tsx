@@ -58,15 +58,15 @@ const ControlModel :React.FC<ControlModelProps> = ({ isShow }) => {
             <div className="modal-dialog modal-dialog-centered modal-lg">
                 <div className="modal-content">
                     <div className="modal-header">
-                        <h5 className="modal-title">Config Setting</h5>
+                        <h5 className="modal-title">カラーレンジの設定</h5>
                         <button type="button" className="btn-close" onClick={() => setIsSetting(false)}></button>
                     </div>
                     <div className="modal-body">
                         <DetectSetting dataDetect={dataDetect} callBack={(value: DataDetectItemProps[] | undefined) => setPostData(value)} isSetting={isSetting} />
                     </div>
                     <div className="modal-footer">
-                        <button type="button" className="btn btn-secondary" onClick={() => setIsSetting(false)}>Close</button>
-                        <button type="button" className="btn btn-primary" onClick={() => handlePostData()}>Detect</button>
+                        <button type="button" className="btn btn-secondary" onClick={() => setIsSetting(false)}>閉じる</button>
+                        <button type="button" className="btn btn-primary" onClick={() => handlePostData()}>実行</button>
                     </div>
                 </div>
             </div>
